@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Nav from "@/components/Navbar/page";
-import Header from "@/components/Header/page";
 
 const ploni = localFont({
   src: [
@@ -65,11 +63,7 @@ export default function RootLayout({
         className={`${ploni.className} antialiased`}
         dir="rtl"
       >
-        <div className="">
-          <Nav />
-          <Header />
-        </div>
-        <main className="mr-80 flex flex-col gap-12">
+        <main className="">
           {children}
         </main>
       </body>
