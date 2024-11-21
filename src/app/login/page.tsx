@@ -5,7 +5,7 @@ import Image from 'next/image'
 import LoginForm from './_components/LoginForm'
 import ForgetPasswordForm from './_components/ForgetPasswordForm'
 
-const loginPage = () => {
+const LoginPage = () => {
     const [isForgotPassword, setIsForgotPassword] = useState(false)
 
     return (
@@ -27,4 +27,4 @@ const loginPage = () => {
     )
 }
 
-export default loginPage
+export default LoginPage
