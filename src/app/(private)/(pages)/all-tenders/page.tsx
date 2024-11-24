@@ -1,15 +1,65 @@
 import React from 'react'
 import Image from 'next/image'
-import Nav from '@/components/Navbar/page'
-import Header from '@/components/Header/page'
+import { AllTenders, columns } from "./columns"
+import { DataTable } from "./data-table"
 
-const allTendersPage = () => {
+async function getData(): Promise<AllTenders[]> {
+    // Fetch data from your API here.
+    return [
+        {
+            id: "728ed52f",
+            tenderName: "ב”ש - ת”א",
+            serviceType: "משלוח",
+            publicationTime: "11:01",
+            publicationDate: "01.08.2024",
+            status: "תפוס",
+            driverName: "משה כהן | 055.7759685",
+        },
+        {
+            id: "728ed52f",
+            tenderName: "ב”ש - ת”א",
+            serviceType: "משלוח",
+            publicationTime: "11:01",
+            publicationDate: "01.08.2024",
+            status: "בוצע",
+            driverName: "משה כהן | 055.7759685",
+        },
+        {
+            id: "728ed52f",
+            tenderName: "ב”ש - ת”א",
+            serviceType: "משלוח",
+            publicationTime: "11:01",
+            publicationDate: "01.08.2024",
+            status: "מבוטל",
+            driverName: "משה כהן | 055.7759685",
+        },
+        {
+            id: "728ed52f",
+            tenderName: "ב”ש - ת”א",
+            serviceType: "משלוח",
+            publicationTime: "11:01",
+            publicationDate: "01.08.2024",
+            status: "תפוס",
+            driverName: "משה כהן | 055.7759685",
+        },
+        {
+            id: "728ed52f",
+            tenderName: "ב”ש - ת”א",
+            serviceType: "משלוח",
+            publicationTime: "11:01",
+            publicationDate: "01.08.2024",
+            status: "ממתין",
+            driverName: "משה כהן | 055.7759685",
+        }
+        // ...
+    ]
+}
+
+const allTendersPage = async () => {
+    const data = await getData()
+
     return (
         <>
-            <div className="">
-                <Nav />
-                <Header />
-            </div>
             <div className='mr-80 flex flex-col gap-12'>
                 <section className="flex flex-col gap-6 mx-20 mt-20">
                     <div className="flex justify-between items-center gap-3 text-3xl border-b border-b-[#BCBCBC] relative">
@@ -40,7 +90,7 @@ const allTendersPage = () => {
                     </div>
 
                     <div className="flex flex-col gap-1">
-
+                        <DataTable columns={columns} data={data} />
                     </div>
                 </section>
             </div>

@@ -1,12 +1,8 @@
-import Nav from "@/components/Navbar/page";
 import Image from "next/image";
 
 export default function Home() {
   return (
     <>
-      <div className="">
-        <Nav />
-      </div>
       <div className="mr-80 flex flex-col gap-12">
         <div className="flex flex-col gap-12">
           <section className="flex flex-col gap-4 mt-20 mx-20">

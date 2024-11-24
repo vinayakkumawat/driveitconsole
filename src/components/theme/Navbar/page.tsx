@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
+import Link from 'next/link';
 
 // Type definitions for nav items and dropdown items
 interface DropdownItem {
@@ -21,7 +22,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { id: 1, title: "כל המכרזים", link: "/all-tenders", icon: "/icons/speaker-icon.svg", isDropdown: false },
-    { id: 2, title: "נהגים", link: "#", icon: "/icons/user-icon.svg", isDropdown: false },
+    { id: 2, title: "נהגים", link: "/drivers", icon: "/icons/user-icon.svg", isDropdown: false },
     {
         id: 3, title: "דוחות", link: "#", icon: "/icons/report-icon.svg", isDropdown: true, dropdownItems: [
             { title: "דוח נהגים", link: "#" },
@@ -46,9 +47,9 @@ const Nav = () => {
 
     return (
         <nav className='h-screen z-20 w-80 py-12 fixed flex flex-col justify-between items-center rounded-tl-3xl bg-foreground'>
-            <div className=''>
+            <Link  className='' href={'/'}>
                 <Image src="/images/logo-white.svg" alt="logo" width={150} height={150} className="" />
-            </div>
+            </Link>
             <div className='flex flex-col gap-2 text-[#F6F7F9] text-xl h-96 overflow-y-scroll no-scrollbar'>
                 {navItems.map((item) => (
                     item.isDropdown ? (
