@@ -101,14 +101,14 @@ const DataTable = ({ data }: Props) => {
                 {item.status === 'פנוי' && <span className='text-[#2EBD32]'>{item.status}</span>}
               </td>
               <td className='flex justify-end gap-2 pl-8'>
-                <Button variant={"secondary"} size={"sm"}>
-                  <img src="/icons/stop-circle.svg" alt="edit" />עצירה
+                <Button variant={"secondary"} size={"icon"}>
+                  <Image src="/icons/stop-circle.svg" alt="stop" width={20} height={20} />
                 </Button>
-                <Button variant={"secondary"} size={"sm"}>
-                  <img src="/icons/edit-icon.svg" alt="edit" />עריכה
+                <Button variant={"secondary"} size={"icon"}>
+                  <Image src="/icons/edit-icon.svg" alt="edit" width={20} height={20} />
                 </Button>
-                <Button variant={"secondary"} size={"sm"}>
-                  <img src="/icons/delete-icon.svg" alt="edit" />מחיקה
+                <Button variant={"secondary"} size={"icon"}>
+                  <Image src="/icons/delete-icon.svg" alt="delete" width={20} height={20} />
                 </Button>
               </td>
             </tr>

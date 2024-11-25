@@ -43,13 +43,13 @@ const DataTable = ({ data }: Props) => {
                             </td>
                             <td className='flex gap-2'>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <img src="/icons/stop-circle.svg" alt="edit" />
+                                    <Image src="/icons/open-eye.svg" alt="see" width={25} height={25} />
                                 </Button>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <img src="/icons/edit-icon.svg" alt="edit" />
+                                    <Image src="/icons/file-list-icon.svg" alt="edit" width={25} height={25} />
                                 </Button>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <img src="/icons/delete-icon.svg" alt="edit" />
+                                    <Image src="/icons/report-icon-black.svg" alt="report" width={25} height={25} className='text-black' />
                                 </Button>
                             </td>
                         </tr>

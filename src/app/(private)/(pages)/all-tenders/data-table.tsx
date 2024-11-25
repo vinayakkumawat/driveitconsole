@@ -40,13 +40,13 @@ const DataTable = ({ data }: Props) => {
                             <td>{item.driverName}</td>
                             <td className='flex gap-2'>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <img src="/icons/stop-circle.svg" alt="edit" />
+                                    <Image src="/icons/stop-circle.svg" alt="stop" width={20} height={20}  />
                                 </Button>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <img src="/icons/edit-icon.svg" alt="edit" />
+                                    <Image src="/icons/edit-icon.svg" alt="edit" width={20} height={20} />
                                 </Button>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <img src="/icons/delete-icon.svg" alt="edit" />
+                                    <Image src="/icons/delete-icon.svg" alt="delete" width={20} height={20} />
                                 </Button>
                             </td>
                         </tr>
