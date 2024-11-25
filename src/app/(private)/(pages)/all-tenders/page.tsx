@@ -1,62 +1,57 @@
 import React from 'react'
 import Image from 'next/image'
-import { AllTenders, columns } from "./columns"
-import { DataTable } from "./data-table"
+import DataTable from './data-table'
 
-async function getData(): Promise<AllTenders[]> {
-    // Fetch data from your API here.
-    return [
-        {
-            id: "728ed52f",
-            tenderName: "ב”ש - ת”א",
-            serviceType: "משלוח",
-            publicationTime: "11:01",
-            publicationDate: "01.08.2024",
-            status: "תפוס",
-            driverName: "משה כהן | 055.7759685",
-        },
-        {
-            id: "728ed52f",
-            tenderName: "ב”ש - ת”א",
-            serviceType: "משלוח",
-            publicationTime: "11:01",
-            publicationDate: "01.08.2024",
-            status: "בוצע",
-            driverName: "משה כהן | 055.7759685",
-        },
-        {
-            id: "728ed52f",
-            tenderName: "ב”ש - ת”א",
-            serviceType: "משלוח",
-            publicationTime: "11:01",
-            publicationDate: "01.08.2024",
-            status: "מבוטל",
-            driverName: "משה כהן | 055.7759685",
-        },
-        {
-            id: "728ed52f",
-            tenderName: "ב”ש - ת”א",
-            serviceType: "משלוח",
-            publicationTime: "11:01",
-            publicationDate: "01.08.2024",
-            status: "תפוס",
-            driverName: "משה כהן | 055.7759685",
-        },
-        {
-            id: "728ed52f",
-            tenderName: "ב”ש - ת”א",
-            serviceType: "משלוח",
-            publicationTime: "11:01",
-            publicationDate: "01.08.2024",
-            status: "ממתין",
-            driverName: "משה כהן | 055.7759685",
-        }
-        // ...
-    ]
-}
+const data = [
+    {
+        id: "728ed52f",
+        tenderName: "ב”ש - ת”א",
+        serviceType: "משלוח",
+        publicationTime: "11:01",
+        publicationDate: "01.08.2024",
+        status: "תפוס",
+        driverName: "משה כהן | 055.7759685",
+    },
+    {
+        id: "728ed52f",
+        tenderName: "ב”ש - ת”א",
+        serviceType: "משלוח",
+        publicationTime: "11:01",
+        publicationDate: "01.08.2024",
+        status: "בוצע",
+        driverName: "משה כהן | 055.7759685",
+    },
+    {
+        id: "728ed52f",
+        tenderName: "ב”ש - ת”א",
+        serviceType: "משלוח",
+        publicationTime: "11:01",
+        publicationDate: "01.08.2024",
+        status: "מבוטל",
+        driverName: "משה כהן | 055.7759685",
+    },
+    {
+        id: "728ed52f",
+        tenderName: "ב”ש - ת”א",
+        serviceType: "משלוח",
+        publicationTime: "11:01",
+        publicationDate: "01.08.2024",
+        status: "תפוס",
+        driverName: "משה כהן | 055.7759685",
+    },
+    {
+        id: "728ed52f",
+        tenderName: "ב”ש - ת”א",
+        serviceType: "משלוח",
+        publicationTime: "11:01",
+        publicationDate: "01.08.2024",
+        status: "ממתין",
+        driverName: "משה כהן | 055.7759685",
+    }
+    // ...
+]
 
 const allTendersPage = async () => {
-    const data = await getData()
 
     return (
         <>
@@ -90,7 +85,7 @@ const allTendersPage = async () => {
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <DataTable columns={columns} data={data} />
+                        <DataTable data={data} />
                     </div>
                 </section>
             </div>

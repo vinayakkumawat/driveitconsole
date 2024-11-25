@@ -81,3 +81,7 @@
 body {
   font-family: 'Ploni', sans-serif;
 }
+
+th, td {
+  padding: 10px;
+}
