@@ -4,8 +4,16 @@ import React from 'react'
 
 const heading = ["", "שם מכרז", "סוג שירות", "שעת פרסום", "סטטוס", "נהג שקיבל את המכרז", ""]
 
+interface TenderData {
+    tenderName: string;
+    serviceType: string;
+    publicationTime: string;
+    status: 'תפוס' | 'בוצע' | 'מבוטל' | 'ממתין';
+    driverName: string;
+}
+
 interface Props {
-    data: Array<{ [key: string]: any }>;
+    data: TenderData[];
 }
 
 const DataTable = ({ data }: Props) => {

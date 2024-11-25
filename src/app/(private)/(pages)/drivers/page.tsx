@@ -2,7 +2,17 @@ import React from 'react'
 import Image from 'next/image'
 import DataTable from './data-table'
 
-const data = [
+interface DriverData {
+  id: string;
+  driverName: string;
+  residentialArea: string;
+  phone: string;
+  additionalPhone: string;
+  associatedWithAChannel: string;
+  status: 'פעיל' | 'לא פעיל';
+}
+
+const data: DriverData[] = [
   {
     id: "1",
     driverName: "נחום שמואלי",

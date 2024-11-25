@@ -2,7 +2,17 @@ import React from 'react'
 import Image from 'next/image'
 import DataTable from './data-table'
 
-const data = [
+interface TenderData {
+    id: string;
+    tenderName: string;
+    serviceType: string;
+    publicationTime: string;
+    publicationDate: string;
+    status: 'תפוס' | 'בוצע' | 'מבוטל' | 'ממתין';
+    driverName: string;
+}
+
+const data: TenderData[] = [
     {
         id: "728ed52f",
         tenderName: "ב”ש - ת”א",

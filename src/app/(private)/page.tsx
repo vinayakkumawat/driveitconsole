@@ -10,8 +10,17 @@ const data = [
   // Add more rows as needed
 ];
 
+interface Data {
+  id: number;
+  name: string;
+  typeOfService: string;
+  status: string;
+  postingDate: string;
+  postingTime: string;
+}
+
 interface Props {
-  data: Array<{ [key: string]: any }>;
+  data: Data[];
 }
 
 export default function Home() {

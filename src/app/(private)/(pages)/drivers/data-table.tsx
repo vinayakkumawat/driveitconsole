@@ -5,8 +5,17 @@ import React from 'react'
 
 const heading = ["", "", "שם נהג", "אזור מגורים", "טלפון", "טלפון נוסף", "משוייך לערוץ", "סטטוס", ""]
 
+interface DriverData {
+    driverName: string;
+    residentialArea: string;
+    phone: string;
+    additionalPhone: string;
+    associatedWithAChannel: string;
+    status: 'פעיל' | 'לא פעיל';
+}
+
 interface Props {
-    data: Array<{ [key: string]: any }>;
+    data: DriverData[];
 }
 
 const DataTable = ({ data }: Props) => {
