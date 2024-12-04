@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
@@ -94,35 +95,38 @@ const DataTable = ({ data }: Props) => {
       <thead className=''></thead>
       <tbody className=''>
         {data.map((item, index) => (
-          <>
-            <tr key={index} className='bg-white h-14 text-lg'>
+          <React.Fragment key={index}>
+            <tr className='bg-white h-14 text-lg text-center'>
               <td>
                 <Image src="/icons/three-ellipse.svg" alt="edit" width={5} height={5} />
               </td>
               <td className="flex items-center">
-                <Checkbox className="h-5 w-5" />
+                <Checkbox className="w-5 h-5" />
               </td>
               <td>{item.name}</td>
               <td>{item.typeOfService}</td>
               <td>{item.postingDate}</td>
               <td>
-                {item.status === 'תפוס' && <span className='text-[#FF0004]'>{item.status}</span>}
-                {item.status === 'פנוי' && <span className='text-[#2EBD32]'>{item.status}</span>}
+                {item.status === 'תפוס' && <div className='bg-[#FFE7E7] w-20 h-8 flex justify-center items-center rounded-lg'><span className='text-[#FF0004]'>{item.status}</span></div>}
+                {item.status === 'פנוי' && <div className='bg-[#F0FFF1] w-20 h-8 flex justify-center items-center rounded-lg'><span className='text-[#2EBD32]'>{item.status}</span></div>}
               </td>
               <td className='flex justify-end gap-2 pl-8'>
-                <Button variant={"secondary"} size={"icon"}>
+                <Button className='text-lg font-light' variant={"secondary"} size={"default"}>
                   <Image src="/icons/stop-circle.svg" alt="stop" width={20} height={20} />
+                  עצירה
                 </Button>
-                <Button variant={"secondary"} size={"icon"}>
+                <Button className='text-lg font-light' variant={"secondary"} size={"default"}>
                   <Image src="/icons/edit-icon.svg" alt="edit" width={20} height={20} />
+                  עריכה
                 </Button>
-                <Button variant={"secondary"} size={"icon"}>
+                <Button className='text-lg font-light' variant={"secondary"} size={"default"}>
                   <Image src="/icons/delete-icon.svg" alt="delete" width={20} height={20} />
+                  מחיקה
                 </Button>
               </td>
             </tr>
             <tr className='h-1'></tr>
-          </>
+          </React.Fragment>
         ))}
       </tbody>
     </table>

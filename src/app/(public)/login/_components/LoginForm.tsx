@@ -18,8 +18,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
+import { useAuth } from '@/contexts/auth-context';
+
 const loginFormSchema = z.object({
-    email: z.string().min(2).max(50),
+    emailOrUsername: z.string().min(2).max(50),
     password: z.string().min(2).max(50)
 })
 
@@ -28,18 +30,26 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
+
+    const { login } = useAuth();
+
     const form = useForm<z.infer<typeof loginFormSchema>>({
         resolver: zodResolver(loginFormSchema),
         defaultValues: {
-            email: "",
+            emailOrUsername: "",
             password: "",
         },
     })
 
     const [showPassword, setShowPassword] = useState(false)
 
-    function onSubmit(values: z.infer<typeof loginFormSchema>) {
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof loginFormSchema>) {
+        try {
+            await login({ username: values.emailOrUsername, password: values.password });
+        } catch (err) {
+            console.log(err);
+            // setError('Invalid username or password');
+        }
     }
 
     return (
@@ -48,7 +58,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
                 <h2 className='text-3xl font-bold'>הי, שנתחבר?</h2>
                 <FormField
                     control={form.control}
-                    name="email"
+                    name="emailOrUsername"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel className='text-lg'>שם משתמש / מייל<span className="text-destructive mr-1">*</span></FormLabel>
@@ -95,7 +105,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
                 />
                 <div className='flex gap-2'>
                     <Button type="submit" className='w-full text-black'>כניסה</Button>
-                    <Button type="submit" className='w-full text-black bg-secondary'>
+                    <Button className='w-full text-black bg-secondary'>
                         כניסה מהירה
                         <Image src='/icons/google.svg' alt='google' width={15} height={15} />
                     </Button>

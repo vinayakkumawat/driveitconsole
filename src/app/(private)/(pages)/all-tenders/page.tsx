@@ -8,7 +8,7 @@ interface TenderData {
     serviceType: string;
     publicationTime: string;
     publicationDate: string;
-    status: 'תפוס' | 'בוצע' | 'מבוטל' | 'ממתין';
+    status: 'תפוס' | 'פנוי';
     driverName: string;
 }
 
@@ -28,16 +28,7 @@ const data: TenderData[] = [
         serviceType: "משלוח",
         publicationTime: "11:01",
         publicationDate: "01.08.2024",
-        status: "בוצע",
-        driverName: "משה כהן | 055.7759685",
-    },
-    {
-        id: "728ed52f",
-        tenderName: "ב”ש - ת”א",
-        serviceType: "משלוח",
-        publicationTime: "11:01",
-        publicationDate: "01.08.2024",
-        status: "מבוטל",
+        status: "תפוס",
         driverName: "משה כהן | 055.7759685",
     },
     {
@@ -55,7 +46,16 @@ const data: TenderData[] = [
         serviceType: "משלוח",
         publicationTime: "11:01",
         publicationDate: "01.08.2024",
-        status: "ממתין",
+        status: "תפוס",
+        driverName: "משה כהן | 055.7759685",
+    },
+    {
+        id: "728ed52f",
+        tenderName: "ב”ש - ת”א",
+        serviceType: "משלוח",
+        publicationTime: "11:01",
+        publicationDate: "01.08.2024",
+        status: "תפוס",
         driverName: "משה כהן | 055.7759685",
     }
     // ...

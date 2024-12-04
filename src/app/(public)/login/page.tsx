@@ -1,11 +1,22 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import LoginForm from './_components/LoginForm'
 import ForgetPasswordForm from './_components/ForgetPasswordForm'
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
 
 const LoginPage = () => {
+    const { user, isLoading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading && user) {
+            router.replace('/');
+        }
+    }, [user, isLoading, router]);
+
     const [isForgotPassword, setIsForgotPassword] = useState(false)
 
     return (

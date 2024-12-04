@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AuthProvider } from '@/contexts/auth-context';
 
 const ploni = localFont({
   src: [
@@ -63,9 +64,11 @@ export default function RootLayout({
         className={`${ploni.className} antialiased`}
         dir="rtl"
       >
-        <main className="">
-          {children}
-        </main>
+        <AuthProvider>
+          <main className="">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

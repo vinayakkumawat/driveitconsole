@@ -8,7 +8,7 @@ interface TenderData {
     tenderName: string;
     serviceType: string;
     publicationTime: string;
-    status: 'תפוס' | 'בוצע' | 'מבוטל' | 'ממתין';
+    status: 'תפוס' | 'פנוי';
     driverName: string;
 }
 
@@ -23,7 +23,7 @@ const DataTable = ({ data }: Props) => {
                 {data.length > 0 && (
                     <tr className='bg-white rounded-t-lg border-b border-black h-14'>
                         {heading.map((head, index) => (
-                            <th key={index} className='text-right text-lg font-medium'>{head}</th>
+                            <th key={index} className='text-center text-lg font-medium'>{head}</th>
                         ))}
                     </tr>
                 )}
@@ -31,8 +31,8 @@ const DataTable = ({ data }: Props) => {
             </thead>
             <tbody className=''>
                 {data.map((item, index) => (
-                    <>
-                        <tr key={index} className='bg-white h-14 text-lg'>
+                    <React.Fragment key={index}>
+                        <tr key={index} className='bg-white h-14 text-lg text-center'>
                             <td>
                                 <Image src="/icons/three-ellipse.svg" alt="edit" width={5} height={5} />
                             </td>
@@ -40,15 +40,13 @@ const DataTable = ({ data }: Props) => {
                             <td>{item.serviceType}</td>
                             <td>{item.publicationTime}</td>
                             <td>
-                                {item.status === 'תפוס' && <span className='text-[#FF0004]'>{item.status}</span>}
-                                {item.status === 'בוצע' && <span className='text-[#2EBD32]'>{item.status}</span>}
-                                {item.status === 'מבוטל' && <span className='text-[#20678B]'>{item.status}</span>}
-                                {item.status === 'ממתין' && <span className='text-[#EF850C]'>{item.status}</span>}
+                                {item.status === 'תפוס' && <div className='bg-[#FFE7E7] w-20 h-8 flex justify-center items-center rounded-lg'><span className='text-[#FF0004]'>{item.status}</span></div>}
+                                {item.status === 'פנוי' && <div className='bg-[#F0FFF1] w-20 h-8 flex justify-center items-center rounded-lg'><span className='text-[#2EBD32]'>{item.status}</span></div>}
                             </td>
                             <td>{item.driverName}</td>
                             <td className='flex gap-2'>
                                 <Button variant={"secondary"} size={"icon"}>
-                                    <Image src="/icons/stop-circle.svg" alt="stop" width={20} height={20}  />
+                                    <Image src="/icons/stop-circle.svg" alt="stop" width={20} height={20} />
                                 </Button>
                                 <Button variant={"secondary"} size={"icon"}>
                                     <Image src="/icons/edit-icon.svg" alt="edit" width={20} height={20} />
@@ -59,7 +57,7 @@ const DataTable = ({ data }: Props) => {
                             </td>
                         </tr>
                         <tr className='h-1'></tr>
-                    </>
+                    </React.Fragment>
                 ))}
             </tbody>
         </table>

@@ -25,6 +25,11 @@ const newDriverFormSchema = z.object({
 
     vehicleType: z.string().min(2).max(50),
     numberOfPlaces: z.number().min(1).max(50),
+    category: z.string().min(2).max(50),
+    vehicleCondition: z.string().min(2).max(50),
+
+    fixedCharge: z.string().min(2).max(50),
+    variableCharge: z.string().min(2).max(50),
 });
 
 type NewDriverFormValues = z.infer<typeof newDriverFormSchema>;
@@ -45,6 +50,11 @@ const NewDriver = () => {
 
             vehicleType: '',
             numberOfPlaces: 0,
+            category: '',
+            vehicleCondition: '',
+
+            fixedCharge: '',
+            variableCharge: '',
         },
     });
 
@@ -98,37 +108,63 @@ const NewDriver = () => {
                                 form={form}
                                 name="firstName"
                                 label="שם פרטי"
+                                inputType='text'
                                 required
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="lastName"
                                 label="שם משפחה"
+                                inputType='text'
                                 required
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="phone"
                                 label="טלפון"
+                                inputType='text'
                                 required
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="additionalPhone"
                                 label="טלפון נוסף"
+                                inputType='text'
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="address"
                                 label="כתובת"
+                                inputType='text'
                                 required
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="city"
                                 label="עיר"
+                                inputType='text'
                                 required
                             />
+                            <FormDataInputSingleElement
+                                form={form}
+                                name="emailAddress"
+                                label="כתובת מייל"
+                                inputType='text'
+                            />
+                            <FormDataInputSingleElement
+                                form={form}
+                                name="serialNumber"
+                                label="מספר סידורי"
+                                inputType='text'
+                            />
+                            <div className='col-span-2'>
+                                <FormDataInputSingleElement
+                                    form={form}
+                                    name="belongsToTheChannel"
+                                    label="שייך לערוץ"
+                                    inputType="select"
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -142,11 +178,25 @@ const NewDriver = () => {
                                 form={form}
                                 name="vehicleType"
                                 label="סוג רכב"
+                                inputType='text'
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="numberOfPlaces"
                                 label="מספר מקומות"
+                                inputType='text'
+                            />
+                            <FormDataInputSingleElement
+                                form={form}
+                                name="category"
+                                label="קטגוריה"
+                                inputType='text'
+                            />
+                            <FormDataInputSingleElement
+                                form={form}
+                                name="vehicleCondition"
+                                label="מצב הרכב"
+                                inputType='text'
                             />
                         </div>
                     </div>
@@ -155,14 +205,50 @@ const NewDriver = () => {
                         <Label className='font-bold'>
                             תשלומים
                         </Label>
-                        <div className="bg-white py-4 px-6 grid grid-cols-1 gap-x-6 gap-y-2 rounded-lg w-full">
+                        <div className="bg-white py-4 px-6 grid grid-cols-1 gap-y-4 rounded-lg w-full">
                             <div className='flex gap-2 items-center'>
-                                <Checkbox />
-                                <Label>ברירת מחדל</Label>
+                                <div className='w-full flex flex-col gap-2'>
+                                    <div className='flex gap-2'>
+                                        <Checkbox />
+                                        <Label>ברירת מחדל</Label>
+                                    </div>
+                                    <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
+                                        <FormDataInputSingleElement
+                                            form={form}
+                                            name="fixedCharge"
+                                            label="חיוב קבוע"
+                                            inputType='text'
+                                        />
+                                        <FormDataInputSingleElement
+                                            form={form}
+                                            name="variableCharge"
+                                            label="חיוב משתנה"
+                                            inputType='text'
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             <div className='flex gap-2 items-center'>
-                                <Checkbox />
-                                <Label>מותאם אישית</Label>
+                                <div className='w-full flex flex-col gap-2'>
+                                    <div className='flex gap-2'>
+                                        <Checkbox />
+                                        <Label>מותאם אישית</Label>
+                                    </div>
+                                    <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
+                                        <FormDataInputSingleElement
+                                            form={form}
+                                            name="fixedCharge"
+                                            label="חיוב קבוע"
+                                            inputType='text'
+                                        />
+                                        <FormDataInputSingleElement
+                                            form={form}
+                                            name="variableCharge"
+                                            label="חיוב משתנה באחוזים"
+                                            inputType='text'
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
