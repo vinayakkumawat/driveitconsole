@@ -2,12 +2,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authenticateUser, logout as authLogout, getCurrentUser } from '@/lib/auth';
+import { initiateLogin, verifyCode, logout as authLogout, getCurrentUser } from '@/lib/auth';
 import type { User, LoginCredentials } from '@/lib/types';
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<{ success: boolean; verificationId?: string }>;
+  verifyLoginCode: (verificationId: string, code: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -31,14 +32,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      const user = await authenticateUser(credentials);
-      if (!user) {
+      const { user, verificationId } = await initiateLogin(credentials);
+      if (!user || !verificationId) {
         throw new Error('Invalid credentials');
       }
-      setUser(user);
-      router.push('/');
+      return { success: true, verificationId };
     } catch (error) {
-      throw error;
+      console.error('Login error:', error);
+      return { success: false };
+    }
+  };
+
+  const verifyLoginCode = async (verificationId: string, code: string) => {
+    try {
+      const verifiedUser = await verifyCode(verificationId, code);
+      if (!verifiedUser) {
+        return false;
+      }
+      setUser(verifiedUser);
+      router.push('/');
+      return true;
+    } catch (error) {
+      console.error('Verification error:', error);
+      return false;
     }
   };
 
@@ -49,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, verifyLoginCode, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

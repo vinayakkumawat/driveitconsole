@@ -1,4 +1,5 @@
 const API_BASE_URL = 'http://drive-it.co.il:5000';
+const CALL2ALL_API_URL = 'https://www.call2all.co.il/ym/api';
 
 interface ApiOptions extends RequestInit {
     params?: Record<string, string>;
@@ -42,4 +43,41 @@ export async function fetchTenders(companyId: string) {
         console.error('Error fetching tenders:', error);
         throw error;
     }
+}
+
+export async function getCall2AllToken(username: string, password: string) {
+    const response = await fetch(
+        `${CALL2ALL_API_URL}/Login?username=${username}&password=${password}`
+    );
+
+    if (!response.ok) {
+        throw new Error('Failed to get Call2All token');
+    }
+
+    const data = await response.json();
+    return data.token;
+}
+
+export async function sendVerificationCode(
+    token: string,
+    phone: string,
+    code: string
+) {
+    const params = new URLSearchParams({
+        token,
+        callerId: '043136703',
+        ttsMessage: code,
+        phones: phone,
+        tts_voice: 'Jacob'
+    });
+
+    const response = await fetch(
+        `${CALL2ALL_API_URL}/SendTTS?${params.toString()}`
+    );
+
+    if (!response.ok) {
+        throw new Error('Failed to send verification code');
+    }
+
+    return response.json();
 }

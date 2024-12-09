@@ -4,12 +4,15 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import LoginForm from './_components/LoginForm'
 import ForgetPasswordForm from './_components/ForgetPasswordForm'
+import VerificationForm from './_components/VerificationForm'
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 
 const LoginPage = () => {
     const { user, isLoading } = useAuth();
     const router = useRouter();
+    const [verificationId, setVerificationId] = useState<string>('');
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
 
     useEffect(() => {
         if (!isLoading && user) {
@@ -17,7 +20,13 @@ const LoginPage = () => {
         }
     }, [user, isLoading, router]);
 
-    const [isForgotPassword, setIsForgotPassword] = useState(false)
+    const handleLoginSuccess = (newVerificationId: string) => {
+        setVerificationId(newVerificationId);
+    };
+
+    const handleBack = () => {
+        setVerificationId('');
+    };
 
     return (
         <div>
@@ -27,10 +36,18 @@ const LoginPage = () => {
                     <div className='flex justify-center items-center'>
                         <Image src='/images/logo.svg' alt='logo' width={200} height={200} />
                     </div>
-                    {isForgotPassword ? (
+                    {verificationId ? (
+                        <VerificationForm 
+                            verificationId={verificationId}
+                            onBack={handleBack}
+                        />
+                    ) : isForgotPassword ? (
                         <ForgetPasswordForm />
                     ) : (
-                        <LoginForm onForgotPasswordClick={() => setIsForgotPassword(true)} />
+                        <LoginForm 
+                            onForgotPasswordClick={() => setIsForgotPassword(true)}
+                            onLoginSuccess={handleLoginSuccess}
+                        />
                     )}
                 </div>
             </div>

@@ -26,12 +26,13 @@ const loginFormSchema = z.object({
 })
 
 interface LoginFormProps {
-    onForgotPasswordClick: () => void
+    onForgotPasswordClick: () => void;
+    onLoginSuccess: (verificationId: string) => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
-
+const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onLoginSuccess }) => {
     const { login } = useAuth();
+    const [error, setError] = useState<string>('');
 
     const form = useForm<z.infer<typeof loginFormSchema>>({
         resolver: zodResolver(loginFormSchema),
@@ -45,10 +46,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
 
     async function onSubmit(values: z.infer<typeof loginFormSchema>) {
         try {
-            await login({ username: values.emailOrUsername, password: values.password });
+            const result = await login({ 
+                username: values.emailOrUsername, 
+                password: values.password 
+            });
+            
+            if (result.success && result.verificationId) {
+                onLoginSuccess(result.verificationId);
+            } else {
+                setError('Invalid username or password');
+            }
         } catch (err) {
-            console.log(err);
-            // setError('Invalid username or password');
+            console.error(err);
+            setError('Login failed. Please try again.');
         }
     }
 
@@ -56,6 +66,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <h2 className='text-3xl font-bold'>הי, שנתחבר?</h2>
+                {error && (
+                    <div className="text-destructive text-sm">{error}</div>
+                )}
                 <FormField
                     control={form.control}
                     name="emailOrUsername"
