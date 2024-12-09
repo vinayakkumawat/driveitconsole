@@ -13,8 +13,8 @@ const navItems: NavItemType[] = [
     {
         id: 3, title: "דוחות", link: "/reports", icon: "/icons/report-icon.svg", isDropdown: true, dropdownItems: [
             { title: "דוח נהגים", link: "/reports/driver-report" },
-            { title: "דוח כללי", link: "#" },
-            { title: "דוח חודשי", link: "#" }
+            { title: "דוח כללי", link: "/reports/general-report" },
+            { title: "דוח חודשי", link: "/reports/personalized-report" }
         ]
     },
     { id: 4, title: "תשלומים", link: "#", icon: "/icons/credit-card-icon.svg", isDropdown: false },

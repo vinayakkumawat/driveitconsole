@@ -33,7 +33,7 @@ const DataTable = ({ data }: Props) => {
             </thead>
             <tbody className=''>
                 {data.map((item, index) => (
-                    <>
+                    <React.Fragment key={index}>
                         <tr key={index} className='bg-white h-14 text-lg text-center'>
                             <td>
                                 <Image src="/icons/three-ellipse.svg" alt="edit" width={5} height={5} />
@@ -63,7 +63,7 @@ const DataTable = ({ data }: Props) => {
                             </td>
                         </tr>
                         <tr className='h-1'></tr>
-                    </>
+                    </React.Fragment>
                 ))}
             </tbody>
         </table>

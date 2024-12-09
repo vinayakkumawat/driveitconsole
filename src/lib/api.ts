@@ -1,8 +1,8 @@
+const API_BASE_URL = 'http://drive-it.co.il:5000';
+
 interface ApiOptions extends RequestInit {
     params?: Record<string, string>;
 }
-
-const API_BASE_URL = 'http://drive-it.co.il:5000';
 
 export async function fetchApi(endpoint: string, options: ApiOptions = {}) {
     const { params, ...fetchOptions } = options;
@@ -15,17 +15,13 @@ export async function fetchApi(endpoint: string, options: ApiOptions = {}) {
         });
     }
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
-
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-    };
-
     const response = await fetch(url.toString(), {
         ...fetchOptions,
-        headers,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        },
+        cache: 'no-store', // Disable caching for real-time data
     });
 
     if (!response.ok) {
@@ -33,4 +29,17 @@ export async function fetchApi(endpoint: string, options: ApiOptions = {}) {
     }
 
     return response.json();
+}
+
+export async function fetchTenders(companyId: string) {
+    try {
+        return await fetchApi('/trip_driver_view', {
+            params: {
+                company_id: `eq.${companyId}`
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching tenders:', error);
+        throw error;
+    }
 }

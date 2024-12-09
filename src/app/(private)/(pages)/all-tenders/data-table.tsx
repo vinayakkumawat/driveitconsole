@@ -1,16 +1,9 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import React from 'react'
+import { TenderData } from './types';
 
 const heading = ["", "שם מכרז", "סוג שירות", "שעת פרסום", "סטטוס", "נהג שקיבל את המכרז", ""]
-
-interface TenderData {
-    tenderName: string;
-    serviceType: string;
-    publicationTime: string;
-    status: 'תפוס' | 'פנוי';
-    driverName: string;
-}
 
 interface Props {
     data: TenderData[];
