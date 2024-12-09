@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import DataTable from './data-table';
 import { ApiTenderData } from './types';
-import { useAuth } from '@/contexts/auth-context';
 import { transformTenderData } from '@/lib/transformData';
 
 interface TenderPageClientProps {
@@ -12,7 +11,6 @@ interface TenderPageClientProps {
 }
 
 export function TenderPageClient({ initialTenders }: TenderPageClientProps) {
-  const { user } = useAuth();
   const [tenders] = useState(() => transformTenderData(initialTenders));
 
   return (

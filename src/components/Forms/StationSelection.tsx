@@ -61,7 +61,7 @@ const StationSelection = () => {
                         <FormField
                             control={form.control}
                             name={"serviceType"}
-                            render={({ field }) => (
+                            render={({ }) => (
                                 <FormItem>
                                     <FormLabel>סוג שירות:</FormLabel>
                                     <FormControl>

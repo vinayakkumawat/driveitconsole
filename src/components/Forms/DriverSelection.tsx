@@ -7,7 +7,6 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Switch } from "@/components/ui/switch"
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
@@ -74,7 +73,7 @@ const DriverSelection = () => {
                         <FormField
                             control={form.control}
                             name={"driversPhone"}
-                            render={({ field }) => (
+                            render={({ }) => (
                                 <FormItem>
                                     <FormLabel>טלפון הנהג:</FormLabel>
                                     <FormControl>
