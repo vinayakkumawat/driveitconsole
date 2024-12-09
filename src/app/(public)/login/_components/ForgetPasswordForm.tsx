@@ -69,7 +69,7 @@ const ForgetPasswordForm = () => {
                         <FormItem>
                             <FormLabel className='text-lg'>מייל<span className="text-destructive mr-1">*</span></FormLabel>
                             <FormControl>
-                                <Input placeholder="" {...field} />
+                                <Input className='bg-white' placeholder="" {...field} />
                             </FormControl>
                             <FormDescription>כתובת המייל איתה נרשמת</FormDescription>
                             <FormMessage />

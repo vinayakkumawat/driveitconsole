@@ -63,7 +63,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
                         <FormItem>
                             <FormLabel className='text-lg'>שם משתמש / מייל<span className="text-destructive mr-1">*</span></FormLabel>
                             <FormControl>
-                                <Input placeholder="" {...field} />
+                                <Input className='bg-white' placeholder="" {...field} />
                             </FormControl>
                             <FormDescription>כתובת המייל איתה נרשמת</FormDescription>
                             <FormMessage />
@@ -82,7 +82,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick }) => {
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder=""
                                         {...field}
-                                        className="pl-10"
+                                        className="pl-10 bg-white"
                                     />
                                     <button
                                         type="button"
