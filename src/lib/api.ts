@@ -63,10 +63,12 @@ export async function sendVerificationCode(
     phone: string,
     code: string
 ) {
+    const formattedMessage = `קוד האימות היא,${code.split('').join(',')}`;
+
     const params = new URLSearchParams({
         token,
         callerId: '043136703',
-        ttsMessage: code,
+        ttsMessage: formattedMessage,
         phones: phone,
         tts_voice: 'Jacob'
     });
