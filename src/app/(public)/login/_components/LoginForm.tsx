@@ -45,9 +45,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onLoginSuc
     const [showPassword, setShowPassword] = useState(false)
 
     async function onSubmit(values: z.infer<typeof loginFormSchema>) {
+        setError(''); // Clear previous errors
         try {
             const result = await login({ 
-                username: values.emailOrUsername, 
+                username: values.emailOrUsername.trim(), // Add trim()
                 password: values.password 
             });
             

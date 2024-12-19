@@ -7,30 +7,42 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { token } = body;
 
-        // Set the authentication cookie
-        (await
-            // Set the authentication cookie
-            cookies()).set('auth-token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 86400, // 24 hours
-                path: '/',
-            });
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Token is required' },
+                { status: 400 }
+            );
+        }
+
+        const cookieStore = await cookies();
+        cookieStore.set('auth-token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 86400, // 24 hours
+            path: '/',
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        console.error('Authentication error:', error);
         return NextResponse.json(
-            { error: 'Authentication failed: ' + error },
-            { status: 401 },
+            { error: 'Authentication failed' },
+            { status: 401 }
         );
     }
 }
 
 export async function DELETE() {
-    // Clear the authentication cookie
-    (await
-        // Clear the authentication cookie
-        cookies()).delete('auth-token');
-    return NextResponse.json({ success: true });
+    try {
+        const cookieStore = await cookies();
+        cookieStore.delete('auth-token');
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Logout error:', error);
+        return NextResponse.json(
+            { error: 'Logout failed' },
+            { status: 500 }
+        );
+    }
 }

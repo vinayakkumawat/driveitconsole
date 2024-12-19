@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { initiateLogin, verifyCode, logout as authLogout, getCurrentUser } from '@/lib/auth';
+import { initiateLogin, verifyCode, logout as authLogout, getCurrentUser, getAuthToken } from '@/lib/auth';
 import type { User, LoginCredentials } from '@/lib/types';
 
 interface AuthContextType {
@@ -22,9 +22,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initAuth = () => {
-      const currentUser = getCurrentUser();
-      setUser(currentUser);
-      setIsLoading(false);
+      try {
+        const currentUser = getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initAuth();
@@ -34,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { user, verificationId } = await initiateLogin(credentials);
       if (!user || !verificationId) {
-        throw new Error('Invalid credentials');
+        return { success: false };
       }
       return { success: true, verificationId };
     } catch (error) {
@@ -49,7 +54,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!verifiedUser) {
         return false;
       }
+      
+      // Set user in context
       setUser(verifiedUser);
+      
+      // Get the auth token that was set during verification
+      const authToken = getAuthToken();
+      if (!authToken) {
+        console.error('No auth token found after verification');
+        return false;
+      }
+
+      // Update server-side authentication
+      try {
+        await fetch('/api/auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: authToken }),
+        });
+      } catch (error) {
+        console.error('Error setting server-side auth:', error);
+      }
+
       router.push('/');
       return true;
     } catch (error) {
@@ -58,10 +86,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
-    authLogout();
-    setUser(null);
-    router.push('/login');
+  const logout = async () => {
+    try {
+      // Clear server-side authentication first
+      await fetch('/api/auth', { method: 'DELETE' });
+      authLogout();
+      setUser(null);
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (

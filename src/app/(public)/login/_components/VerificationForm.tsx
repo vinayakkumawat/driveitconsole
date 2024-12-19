@@ -29,6 +29,7 @@ interface VerificationFormProps {
 const VerificationForm: React.FC<VerificationFormProps> = ({ verificationId, onBack }) => {
     const { verifyLoginCode } = useAuth();
     const [error, setError] = useState<string>('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof verificationFormSchema>>({
         resolver: zodResolver(verificationFormSchema),
@@ -38,14 +39,20 @@ const VerificationForm: React.FC<VerificationFormProps> = ({ verificationId, onB
     });
 
     async function onSubmit(values: z.infer<typeof verificationFormSchema>) {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        setError('');
+        
         try {
-            const success = await verifyLoginCode(verificationId, values.code);
+            const success = await verifyLoginCode(verificationId, values.code.trim());
             if (!success) {
                 setError('Invalid verification code');
             }
         } catch (err) {
             console.error(err);
             setError('Failed to verify code');
+        } finally {
+            setIsSubmitting(false);
         }
     }
 

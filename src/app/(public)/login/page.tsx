@@ -30,9 +30,9 @@ const LoginPage = () => {
 
     return (
         <div>
-            <div className="bg-[url('/images/login-bg.svg')] h-screen bg-no-repeat bg-cover bg-right-bottom flex justify-end items-start">
-                <div className='z-10 absolute left-0 -top-10 bg-background blur-3xl h-[700px] w-[700px] rounded-full'></div>
-                <div className='z-20 flex flex-col gap-20 ml-44 mt-20 w-96'>
+            <div className="bg-[url('/images/login-bg.svg')] h-screen bg-no-repeat bg-cover bg-right-bottom flex justify-center items-center sm:justify-end sm:items-start">
+                <div className='z-10 absolute left-0 sm:-top-10 bg-background blur-[64px] sm:blur-3xl h-[700px] w-[700px] rounded-full'></div>
+                <div className='z-20 flex flex-col gap-20 sm:ml-44 sm:mt-20 w-96 p-4'>
                     <div className='flex justify-center items-center'>
                         <Image src='/images/logo.svg' alt='logo' width={200} height={200} />
                     </div>
