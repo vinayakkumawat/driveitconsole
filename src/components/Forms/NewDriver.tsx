@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,32 +9,66 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import FormDataInputSingleElement from '@/components/ui/formDataInputSingleElement';
 import { Label } from '../ui/label';
-import { Checkbox } from "@/components/ui/checkbox"
 import Image from 'next/image';
+import { generateSerialNumber, formatPhoneNumber } from '@/lib/utils';
+import { API_BASE_URL, API_TOKEN } from '@/lib/api';
+import { getCurrentUser } from '@/lib/auth';
 
 const newDriverFormSchema = z.object({
     firstName: z.string().min(2).max(50),
     lastName: z.string().min(2).max(50),
     phone: z.string().min(2).max(50),
-    additionalPhone: z.string().min(2).max(50),
-    address: z.string().min(2).max(50),
-    city: z.string().min(2).max(50),
-    emailAddress: z.string().email(),
+    additionalPhone: z.string().optional(),
+    address: z.string().optional(),
+    city: z.string().optional(),
+    emailAddress: z.string().email().optional(),
     serialNumber: z.string().min(2).max(50),
-    belongsToTheChannel: z.string().min(2).max(50),
+    belongsToTheChannel: z.string().optional(),
 
-    vehicleType: z.string().min(2).max(50),
-    numberOfPlaces: z.number().min(1).max(50),
-    category: z.string().min(2).max(50),
-    vehicleCondition: z.string().min(2).max(50),
+    vehicleType: z.string().optional(),
+    numberOfPlaces: z.number().optional(),
+    category: z.string().optional(),
+    vehicleCondition: z.string().optional(),
 
-    fixedCharge: z.string().min(2).max(50),
-    variableCharge: z.string().min(2).max(50),
+    fixedCharge: z.number().optional(),
+    variableCharge: z.number().optional(),
 });
 
 type NewDriverFormValues = z.infer<typeof newDriverFormSchema>;
 
-const NewDriver = () => {
+interface CompanyDetails {
+    id: number;
+    defaultFixedCharge: string;
+    defaultVariableCharge: string;
+}
+
+interface UserDetails {
+    id: number;
+}
+
+interface NewDriverProps {
+    onCancel: () => void;
+}
+
+const NewDriver = ({ onCancel }: NewDriverProps) => {
+    const currentUser = getCurrentUser();
+    // const userCompany = getCurrentUserCompany();
+
+    // console.log(userCompany)
+
+    const [companyDetails] = useState<CompanyDetails>({
+        id: 1,
+        defaultFixedCharge: "100",
+        defaultVariableCharge: "1.5"
+    });
+    const [userDetails] = useState<UserDetails>({
+        id: currentUser.id
+    });
+    const [selectedCheckbox, setSelectedCheckbox] = useState<string | null>(null);
+    const handleCheckboxChange = (option: string) => {
+        setSelectedCheckbox(prev => (prev === option ? null : option));
+    };
+
     const form = useForm<NewDriverFormValues>({
         resolver: zodResolver(newDriverFormSchema),
         defaultValues: {
@@ -45,7 +79,7 @@ const NewDriver = () => {
             address: '',
             city: '',
             emailAddress: '',
-            serialNumber: '',
+            serialNumber: generateSerialNumber(companyDetails.id, userDetails.id),
             belongsToTheChannel: '',
 
             vehicleType: '',
@@ -53,13 +87,55 @@ const NewDriver = () => {
             category: '',
             vehicleCondition: '',
 
-            fixedCharge: '',
-            variableCharge: '',
+            fixedCharge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : 0,
+            variableCharge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : 0,
         },
     });
 
-    function onSubmit(values: NewDriverFormValues) {
-        console.log(values);
+    async function onSubmit(values: NewDriverFormValues) {
+        try {
+            const token = localStorage.getItem('auth-token');
+            if (!token) {
+                throw new Error('Authentication token not found');
+            }
+
+            const formattedData = {
+                company_id: companyDetails.id,
+                first_name: values.firstName,
+                last_name: values.lastName || '',
+                address: values.address || '',
+                city: values.city || '',
+                serial_number: values.serialNumber,
+                channel: values.belongsToTheChannel || '',
+                vehicle_type: values.vehicleType || '',
+                number_of_seats: values.numberOfPlaces || 0,
+                category: values.category || '',
+                vehicle_status: values.vehicleCondition || '',
+                email: values.emailAddress || '',
+                phone: formatPhoneNumber(values.phone),
+                additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
+                fixed_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : parseFloat(values.fixedCharge?.toString() || '0'),
+                variable_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultVariableCharge) : parseFloat(values.variableCharge?.toString() || '0'),
+            };
+
+            const response = await fetch(`${API_BASE_URL}/drivers`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                },
+                body: JSON.stringify(formattedData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create driver');
+            }
+
+            onCancel();
+
+        } catch (error) {
+            console.error('Error creating driver:', error);
+        }
     }
 
     return (
@@ -136,14 +212,12 @@ const NewDriver = () => {
                                 name="address"
                                 label="כתובת"
                                 inputType='text'
-                                required
                             />
                             <FormDataInputSingleElement
                                 form={form}
                                 name="city"
                                 label="עיר"
                                 inputType='text'
-                                required
                             />
                             <FormDataInputSingleElement
                                 form={form}
@@ -206,51 +280,67 @@ const NewDriver = () => {
                             תשלומים
                         </Label>
                         <div className="bg-white py-4 px-6 grid grid-cols-1 gap-y-4 rounded-lg w-full">
+                            {/* Default Option */}
                             <div className='flex gap-2 items-center'>
                                 <div className='w-full flex flex-col gap-2'>
                                     <div className='flex gap-2'>
-                                        <Checkbox />
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedCheckbox === 'default'}
+                                            onChange={() => handleCheckboxChange('default')}
+                                        />
                                         <Label>ברירת מחדל</Label>
                                     </div>
-                                    <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
-                                        <FormDataInputSingleElement
-                                            form={form}
-                                            name="fixedCharge"
-                                            label="חיוב קבוע"
-                                            inputType='text'
-                                        />
-                                        <FormDataInputSingleElement
-                                            form={form}
-                                            name="variableCharge"
-                                            label="חיוב משתנה"
-                                            inputType='text'
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='flex gap-2 items-center'>
-                                <div className='w-full flex flex-col gap-2'>
-                                    <div className='flex gap-2'>
-                                        <Checkbox />
-                                        <Label>מותאם אישית</Label>
-                                    </div>
-                                    <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
-                                        <FormDataInputSingleElement
-                                            form={form}
-                                            name="fixedCharge"
-                                            label="חיוב קבוע"
-                                            inputType='text'
-                                        />
-                                        <FormDataInputSingleElement
-                                            form={form}
-                                            name="variableCharge"
-                                            label="חיוב משתנה באחוזים"
-                                            inputType='text'
-                                        />
-                                    </div>
+                                    {selectedCheckbox === 'default' && (
+                                        <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
+                                            <FormDataInputSingleElement
+                                                form={form}
+                                                name="fixedCharge"
+                                                label="חיוב קבוע"
+                                                inputType='text'
+                                                disabled
+                                            />
+                                            <FormDataInputSingleElement
+                                                form={form}
+                                                name="variableCharge"
+                                                label="חיוב משתנה"
+                                                inputType='text'
+                                                disabled
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
+                            {/* Custom Option */}
+                            <div className='flex gap-2 items-center'>
+                                <div className='w-full flex flex-col gap-2'>
+                                    <div className='flex gap-2'>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedCheckbox === 'custom'}
+                                            onChange={() => handleCheckboxChange('custom')}
+                                        />
+                                        <Label>מותאם אישית</Label>
+                                    </div>
+                                    {selectedCheckbox === 'custom' && (
+                                        <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
+                                            <FormDataInputSingleElement
+                                                form={form}
+                                                name="fixedCharge"
+                                                label="חיוב קבוע"
+                                                inputType='text'
+                                            />
+                                            <FormDataInputSingleElement
+                                                form={form}
+                                                name="variableCharge"
+                                                label="חיוב משתנה באחוזים"
+                                                inputType='text'
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -258,7 +348,7 @@ const NewDriver = () => {
 
                 <div className='flex justify-center items-center gap-2 px-8'>
                     <Button type="submit" className='w-full text-black h-8'>שמור</Button>
-                    <Button className='w-full text-black bg-secondary h-8'>ביטול</Button>
+                    <Button onClick={onCancel} className='w-full text-black bg-secondary h-8'>ביטול</Button>
                 </div>
             </form>
         </Form>

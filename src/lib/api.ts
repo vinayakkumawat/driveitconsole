@@ -1,5 +1,5 @@
-const API_BASE_URL = 'http://drive-it.co.il:5000';
-const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywicm9sZSI6InJvb3QiLCJpYXQiOjE3MzM4NjA3NjIsImV4cCI6MTc2NTQxODM2Mn0.iaXQ5Ha4Jr6fXAcb4Xf-mYjL6hElnh2J6SyTNMdAKzA';
+export const API_BASE_URL = 'http://drive-it.co.il:5000';
+export const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywicm9sZSI6InJvb3QiLCJpYXQiOjE3MzM4NjA3NjIsImV4cCI6MTc2NTQxODM2Mn0.iaXQ5Ha4Jr6fXAcb4Xf-mYjL6hElnh2J6SyTNMdAKzA';
 const CALL2ALL_API_URL = 'https://www.call2all.co.il/ym/api';
 
 interface ApiOptions extends RequestInit {
@@ -43,6 +43,21 @@ export async function fetchTenders(companyId: string) {
         });
     } catch (error) {
         console.error('Error fetching tenders:', error);
+        throw error;
+    }
+}
+
+export async function fetchCompanyLogo(companyId: string) {
+    try {
+        const companyData = await fetchApi('/companies', {
+            params: {
+                company_id: `eq.${companyId}`
+            }
+        });
+        const logo = companyData[0]?.logo || '/images/sample-logo.svg';
+        return logo;
+    } catch (error) {
+        console.error('Error fetching company logo:', error);
         throw error;
     }
 }

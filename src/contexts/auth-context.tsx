@@ -38,9 +38,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       const { user, verificationId } = await initiateLogin(credentials);
-      if (!user || !verificationId) {
+      if (!user) {
         return { success: false };
       }
+
+      // Check if this was a direct login
+      if (verificationId === 'direct-login') {
+        setUser(user);
+        router.push('/');
+        return { success: true };
+      }
+
+      // Normal flow with verification
       return { success: true, verificationId };
     } catch (error) {
       console.error('Login error:', error);
@@ -54,10 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!verifiedUser) {
         return false;
       }
-      
+
       // Set user in context
       setUser(verifiedUser);
-      
+
       // Get the auth token that was set during verification
       const authToken = getAuthToken();
       if (!authToken) {

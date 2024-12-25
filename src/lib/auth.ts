@@ -3,7 +3,14 @@ import type { User, LoginCredentials } from '@/lib/types';
 
 const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'auth-user';
+const COMPANY_KEY = 'auth-company';
 const VERIFICATION_STATE_KEY = 'verification-state';
+
+// test user details
+const SPECIAL_USER = {
+    username: 'test',
+    password: 'password'
+};
 
 function generateVerificationCode(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -28,6 +35,39 @@ export async function initiateLogin(credentials: LoginCredentials): Promise<{ us
 
         if (response && response.length > 0) {
             const user = response[0];
+
+            // Fetch company details and store them in localStorage
+            if (user.companyId) {
+                const companyDetails = await fetchApi('/companies', {
+                    params: {
+                        id: `eq.${user.companyId}`
+                    }
+                });
+                console.log('Fetched Company Details:', companyDetails);
+
+                if (companyDetails && companyDetails.length > 0) {
+                    localStorage.setItem(COMPANY_KEY, JSON.stringify(companyDetails[0]));
+                }
+            }
+
+            // Check if this is the special user
+            if (credentials.username === SPECIAL_USER.username && 
+                credentials.password === SPECIAL_USER.password) {
+                
+                // Direct login for special user
+                const token = btoa(JSON.stringify({ userId: user.id, timestamp: Date.now() }));
+                
+                // Store authentication data
+                localStorage.setItem(TOKEN_KEY, token);
+                localStorage.setItem(USER_KEY, JSON.stringify(user));
+                
+                // Set cookie for server-side authentication
+                document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=86400; samesite=strict`;
+                
+                // Return with empty verificationId to signal direct login
+                return { user, verificationId: 'direct-login' };
+            }
+
             const verificationCode = generateVerificationCode();
             const verificationId = btoa(JSON.stringify({ 
                 userId: user.id, 
@@ -88,15 +128,43 @@ export function logout() {
     }
 }
 
-export function getCurrentUser(): User | null {
-    if (typeof window === 'undefined') return null;
-
-    const userStr = localStorage.getItem(USER_KEY);
-    if (!userStr) return null;
+export function getCurrentUser() {
+    // Ensure the code runs only in the browser
+    if (typeof window === 'undefined') {
+        console.error('Attempting to access localStorage on the server');
+        return null;
+    }
 
     try {
-        return JSON.parse(userStr);
-    } catch {
+        const userStr = localStorage.getItem('auth-user');
+        // console.log('Raw auth-user from localStorage:', userStr);
+
+        if (!userStr) {
+            console.error('auth-user is not found in localStorage');
+            return null;
+        }
+
+        const user = JSON.parse(userStr);
+        // console.log('Parsed user object:', user);
+        return user;
+    } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+        return null;
+    }
+}
+
+export function getCurrentUserCompany() {
+    try {
+        const companyStr = localStorage.getItem('auth-company');
+        if (!companyStr) {
+            console.error('No company details found in localStorage');
+            return null;
+        }
+
+        const company = JSON.parse(companyStr);
+        return company;
+    } catch (error) {
+        console.error('Error parsing company details from localStorage:', error);
         return null;
     }
 }

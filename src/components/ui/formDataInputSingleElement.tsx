@@ -11,6 +11,8 @@ interface Props<T extends FieldValues> {
     label: string;
     inputType: 'text' | 'number' | 'email' | 'select';
     required?: boolean;
+    disabled?: boolean;
+    txtInput?: string;
 }
 
 const FormDataInputSingleElement = <T extends FieldValues>({
@@ -19,6 +21,7 @@ const FormDataInputSingleElement = <T extends FieldValues>({
     label,
     inputType,
     required,
+    disabled,
 }: Props<T>) => {
     return (
         <FormField
@@ -47,6 +50,7 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                                 <><Input placeholder="" {...field} className="bg-background w-full h-8" /><button
                                     type="button"
                                     className="absolute inset-y-0 left-2 flex items-center"
+                                    disabled={disabled}
                                 >
                                     <Image
                                         src={'/icons/edit-icon.svg'}
