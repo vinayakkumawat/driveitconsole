@@ -6,13 +6,14 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import FormDataInputSingleElement from '@/components/ui/formDataInputSingleElement';
 import { Label } from '../ui/label';
 import Image from 'next/image';
 import { generateSerialNumber, formatPhoneNumber } from '@/lib/utils';
 import { API_BASE_URL, API_TOKEN } from '@/lib/api';
 import { getCurrentUser } from '@/lib/auth';
+import { Input } from '../ui/input';
 
 const newDriverFormSchema = z.object({
     firstName: z.string().min(2).max(50),
@@ -225,11 +226,17 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
                                 label="כתובת מייל"
                                 inputType='text'
                             />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="serialNumber"
-                                label="מספר סידורי"
-                                inputType='text'
+                            <FormField
+                                control={form.control}
+                                name={"serialNumber"}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>מספר סידורי</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="" value={field.value} readOnly className="bg-background w-full h-8" />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
                             />
                             <div className='col-span-2'>
                                 <FormDataInputSingleElement
@@ -293,19 +300,29 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
                                     </div>
                                     {selectedCheckbox === 'default' && (
                                         <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
-                                            <FormDataInputSingleElement
-                                                form={form}
-                                                name="fixedCharge"
-                                                label="חיוב קבוע"
-                                                inputType='text'
-                                                disabled
+                                            <FormField
+                                                control={form.control}
+                                                name={"fixedCharge"}
+                                                render={({ }) => (
+                                                    <FormItem>
+                                                        <FormLabel>חיוב קבוע</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="" value={companyDetails.defaultFixedCharge} readOnly className="bg-background w-full h-8" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
                                             />
-                                            <FormDataInputSingleElement
-                                                form={form}
-                                                name="variableCharge"
-                                                label="חיוב משתנה"
-                                                inputType='text'
-                                                disabled
+                                            <FormField
+                                                control={form.control}
+                                                name={"variableCharge"}
+                                                render={({ }) => (
+                                                    <FormItem>
+                                                        <FormLabel>חיוב משתנה</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="" value={companyDetails.defaultVariableCharge} readOnly className="bg-background w-full h-8" />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
                                             />
                                         </div>
                                     )}
