@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
+import { fetchCompanyLogo } from '@/lib/api';
 
 export function UserProfile() {
   const { logout } = useAuth();
@@ -24,8 +25,8 @@ export function UserProfile() {
 
           if (!companyId) throw new Error('Company ID is missing.');
 
-          // const companyLogo = await fetchCompanyLogo(companyId);
-          const companyLogo = '/images/sample-logo.svg';
+          const companyLogo = await fetchCompanyLogo(companyId);
+          // const companyLogo = '/images/sample-logo.svg';
 
           setUsername(user.username);
           setPhone(user.phone);
@@ -49,7 +50,7 @@ export function UserProfile() {
 
   return (
     <div className="flex flex-col justify-center items-center gap-2">
-      <Image src={companyLogo} alt="home" width={50} height={50} className="w-24 h-24" />
+      <Image src={companyLogo} alt="home" width={50} height={50} className="w-24 h-24 rounded-full" />
       <div className="text-white flex flex-col justify-center items-center">
         <span className="text-lg flex">{username}</span>
         <span className="text-base font-light flex">{phone}</span>

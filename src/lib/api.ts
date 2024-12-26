@@ -51,10 +51,10 @@ export async function fetchCompanyLogo(companyId: string) {
     try {
         const companyData = await fetchApi('/companies', {
             params: {
-                company_id: `eq.${companyId}`
+                id: `eq.${companyId}`
             }
         });
-        const logo = companyData[0]?.logo || '/images/sample-logo.svg';
+        const logo = companyData[0]?.logolink || '/images/sample-logo.svg';
         return logo;
     } catch (error) {
         console.error('Error fetching company logo:', error);
