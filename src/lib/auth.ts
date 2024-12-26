@@ -12,7 +12,7 @@ const SPECIAL_USER = {
     password: 'password'
 };
 
-function generateVerificationCode(): string {
+export function generateVerificationCode(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
