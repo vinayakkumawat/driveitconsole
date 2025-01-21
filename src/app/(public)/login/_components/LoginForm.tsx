@@ -45,10 +45,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onLoginSuc
     const [showPassword, setShowPassword] = useState(false)
 
     async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-        setError(''); // Clear previous errors
+        setError('');
         try {
             const result = await login({ 
-                username: values.emailOrUsername.trim(), // Add trim()
+                username: values.emailOrUsername.trim(),
                 password: values.password 
             });
             
@@ -68,16 +68,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onLoginSuc
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <h2 className='text-3xl font-bold'>הי, שנתחבר?</h2>
                 {error && (
-                    <div className="text-destructive text-sm">{error}</div>
+                    <div role="alert" className="text-destructive text-sm">{error}</div>
                 )}
                 <FormField
                     control={form.control}
                     name="emailOrUsername"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className='text-lg'>שם משתמש / מייל<span className="text-destructive mr-1">*</span></FormLabel>
+                            <FormLabel htmlFor="login-email-username" className='text-lg'>
+                                שם משתמש / מייל<span className="text-destructive mr-1">*</span>
+                            </FormLabel>
                             <FormControl>
-                                <Input className='bg-white' placeholder="" {...field} />
+                                <Input 
+                                    id="login-email-username"
+                                    className='bg-white' 
+                                    placeholder="" 
+                                    {...field} 
+                                />
                             </FormControl>
                             <FormDescription>כתובת המייל איתה נרשמת</FormDescription>
                             <FormMessage />
@@ -89,19 +96,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onLoginSuc
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className='text-lg'>סיסמה<span className="text-destructive mr-1">*</span></FormLabel>
+                            <FormLabel htmlFor="login-password" className='text-lg'>
+                                סיסמה<span className="text-destructive mr-1">*</span>
+                            </FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input
+                                        id="login-password"
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder=""
                                         {...field}
                                         className="pl-10 bg-white"
+                                        aria-describedby="password-toggle"
                                     />
                                     <button
+                                        id="password-toggle"
                                         type="button"
                                         className="absolute inset-y-0 left-2 flex items-center"
                                         onClick={() => setShowPassword(!showPassword)}
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                                     >
                                         <Image
                                             src={'/icons/open-eye.svg'}
@@ -112,16 +125,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onLoginSuc
                                     </button>
                                 </div>
                             </FormControl>
-                            <FormDescription className="text-end hover:underline cursor-pointer" onClick={onForgotPasswordClick}>שכחתי את הסיסמה</FormDescription>
+                            <FormDescription>
+                                <button 
+                                    type="button"
+                                    className="w-full text-end hover:underline cursor-pointer" 
+                                    onClick={onForgotPasswordClick}
+                                >
+                                    שכחתי את הסיסמה
+                                </button>
+                            </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 <div className='flex gap-2'>
                     <Button type="submit" className='w-full text-black'>כניסה</Button>
-                    <Button className='w-full text-black bg-secondary'>
+                    <Button type="button" className='w-full text-black bg-secondary flex items-center gap-2'>
                         כניסה מהירה
-                        <Image src='/icons/google.svg' alt='google' width={15} height={15} />
+                        <Image src='/icons/google.svg' alt='Sign in with Google' width={15} height={15} />
                     </Button>
                 </div>
             </form>

@@ -56,25 +56,47 @@ const VerificationForm: React.FC<VerificationFormProps> = ({ verificationId, onB
         }
     }
 
+    const handleInputChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        onChange: (value: string) => void
+    ) => {
+        const value = event.target.value.replace(/[^0-9]/g, '');
+        onChange(value);
+    };
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <h2 className='text-3xl font-bold'>אימות דו-שלבי</h2>
-                <p className="text-muted-foreground">
+                <h2 className='text-3xl font-bold' id="verification-title">אימות דו-שלבי</h2>
+                <p 
+                    className="text-muted-foreground" 
+                    id="verification-description"
+                >
                     קוד אימות נשלח למספר הטלפון שלך. אנא הזן את הקוד כדי להמשיך.
                 </p>
                 
                 <FormField
                     control={form.control}
                     name="code"
-                    render={({ field }) => (
+                    render={({ field: { onChange, ...field } }) => (
                         <FormItem>
-                            <FormLabel className='text-lg'>קוד אימות<span className="text-destructive mr-1">*</span></FormLabel>
+                            <FormLabel 
+                                htmlFor="verification-code-input" 
+                                className='text-lg'
+                            >
+                                קוד אימות<span className="text-destructive mr-1">*</span>
+                            </FormLabel>
                             <FormControl>
                                 <Input 
+                                    id="verification-code-input"
                                     className='bg-white text-center text-2xl tracking-widest' 
                                     maxLength={6}
-                                    {...field} 
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    autoComplete="one-time-code"
+                                    aria-describedby="verification-description"
+                                    onChange={(e) => handleInputChange(e, onChange)}
+                                    {...field}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -83,12 +105,31 @@ const VerificationForm: React.FC<VerificationFormProps> = ({ verificationId, onB
                 />
 
                 {error && (
-                    <div className="text-destructive text-sm">{error}</div>
+                    <div 
+                        role="alert" 
+                        className="text-destructive text-sm"
+                        aria-live="polite"
+                    >
+                        {error}
+                    </div>
                 )}
 
                 <div className='flex gap-2'>
-                    <Button type="submit" className='w-full text-black'>אימות</Button>
-                    <Button type="button" variant="secondary" className='w-full text-black' onClick={onBack}>
+                    <Button 
+                        type="submit" 
+                        className='w-full text-black'
+                        disabled={isSubmitting}
+                        aria-busy={isSubmitting}
+                    >
+                        {isSubmitting ? 'מאמת...' : 'אימות'}
+                    </Button>
+                    <Button 
+                        type="button" 
+                        variant="secondary" 
+                        className='w-full text-black' 
+                        onClick={onBack}
+                        aria-label="חזרה לעמוד הקודם"
+                    >
                         חזרה
                     </Button>
                 </div>

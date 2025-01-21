@@ -10,6 +10,7 @@ const publicPaths = [
   '/assets',
   '/icons',
   '/api/auth',
+  '/api',
 ];
 
 function isPublicPath(path: string): boolean {

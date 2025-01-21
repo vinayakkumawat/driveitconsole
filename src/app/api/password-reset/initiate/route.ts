@@ -30,7 +30,9 @@ export async function POST(req: Request) {
             success: true,
             userId: user.id,
             verificationId
-        }));
+        }), {
+            headers: { 'Content-Type': 'application/json' }
+        })
     } catch (error) {
         console.error(error);
         return new Response(JSON.stringify({ success: false }), { status: 500 });

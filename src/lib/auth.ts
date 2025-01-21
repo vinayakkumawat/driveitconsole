@@ -140,7 +140,6 @@ export function getCurrentUser() {
         // console.log('Raw auth-user from localStorage:', userStr);
 
         if (!userStr) {
-            console.error('auth-user is not found in localStorage');
             return null;
         }
 

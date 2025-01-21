@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Check if this was a direct login
       if (verificationId === 'direct-login') {
         setUser(user);
-        router.push('/');
+        window.location.href = '/';
         return { success: true };
       }
 
