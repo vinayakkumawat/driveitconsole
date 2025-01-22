@@ -3,12 +3,16 @@ import { generateVerificationCode } from '@/lib/auth';
 
 export async function POST(req: Request) {
     const { email } = await req.json();
+
+    console.log('Initiating password reset for email:', email);
     
     try {
         // Get user by email
         const users = await fetchApi('/users', {
             params: { email: `eq.${email}` }
         });
+
+        // console.log('Found users:', users);
         
         if (!users.length) {
             return new Response(JSON.stringify({ success: false }), { status: 404 });

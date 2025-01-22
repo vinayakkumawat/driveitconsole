@@ -31,7 +31,19 @@ export async function fetchApi(endpoint: string, options: ApiOptions = {}) {
         throw new Error(`API Error: ${response.statusText}`);
     }
 
-    return response.json();
+    // Handle response for empty or no-content cases
+    if (response.status === 204) {
+        return null; // No Content
+    }
+
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.includes('application/json')) {
+        // Attempt to parse JSON response
+        return response.json();
+    }
+
+    // If not JSON, return as text or null for unexpected cases
+    return response.text().then((text) => (text ? text : null));
 }
 
 export async function fetchTenders(companyId: string) {
