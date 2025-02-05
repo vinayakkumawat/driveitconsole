@@ -89,7 +89,7 @@ export function DataTable<T extends { id?: string | number }>({
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="px-4 py-6" align="end">
-                  Filter options will come here here.
+                  Filter options will come here
                 </PopoverContent>
               </Popover>
             )}
