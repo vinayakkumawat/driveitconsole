@@ -1,6 +1,8 @@
-import React from 'react'
-import Image from 'next/image'
-import DataTable from './data-table'
+'use client'
+
+import React, { useState } from 'react';
+import { Column, Action } from '@/lib/types';
+import { DataTable } from '@/components/theme/DataTable';
 
 interface DriverData {
   id: string;
@@ -13,85 +15,98 @@ interface DriverData {
 }
 
 const data: DriverData[] = [
-  {
-    id: "1",
-    driverName: "נחום שמואלי",
-    residentialArea: "ירושלים",
-    phone: "050.663.4258",
-    additionalPhone: "055.363.2685",
-    associatedWithAChannel: "2125869354",
-    status: "לא פעיל",
-  },
-  {
-    id: "2",
-    driverName: "נחום שמואלי",
-    residentialArea: "ירושלים",
-    phone: "050.663.4258",
-    additionalPhone: "055.363.2685",
-    associatedWithAChannel: "2125869354",
-    status: "לא פעיל",
-  },
-  {
-    id: "3",
-    driverName: "נחום שמואלי",
-    residentialArea: "ירושלים",
-    phone: "050.663.4258",
-    additionalPhone: "055.363.2685",
-    associatedWithAChannel: "2125869354",
-    status: "לא פעיל",
-  },
-  {
-    id: "4",
-    driverName: "נחום שמואלי",
-    residentialArea: "ירושלים",
-    phone: "050.663.4258",
-    additionalPhone: "055.363.2685",
-    associatedWithAChannel: "2125869354",
-    status: "לא פעיל",
-  },
-  {
-    id: "5",
-    driverName: "נחום שמואלי",
-    residentialArea: "ירושלים",
-    phone: "050.663.4258",
-    additionalPhone: "055.363.2685",
-    associatedWithAChannel: "2125869354",
-    status: "לא פעיל",
-  },
-  // ...
-]
+  { id: "1", driverName: "אבי כהן", residentialArea: "תל אביב", phone: "052.123.4567", additionalPhone: "054.987.6543", associatedWithAChannel: "987654321", status: "פעיל" },
+  { id: "2", driverName: "יוסי לוי", residentialArea: "חיפה", phone: "053.321.6789", additionalPhone: "056.654.3210", associatedWithAChannel: "876543210", status: "לא פעיל" },
+  { id: "3", driverName: "דני פרץ", residentialArea: "באר שבע", phone: "050.111.2222", additionalPhone: "058.333.4444", associatedWithAChannel: "765432109", status: "פעיל" },
+  { id: "4", driverName: "רוני ישראלי", residentialArea: "נתניה", phone: "051.222.3333", additionalPhone: "059.444.5555", associatedWithAChannel: "654321098", status: "לא פעיל" },
+  { id: "5", driverName: "משה דנינו", residentialArea: "אשדוד", phone: "055.333.4444", additionalPhone: "057.555.6666", associatedWithAChannel: "543210987", status: "פעיל" },
+  { id: "6", driverName: "יונתן רז", residentialArea: "רמת גן", phone: "054.444.5555", additionalPhone: "052.666.7777", associatedWithAChannel: "432109876", status: "לא פעיל" },
+  { id: "7", driverName: "אורן שמש", residentialArea: "פתח תקווה", phone: "053.555.6666", additionalPhone: "051.777.8888", associatedWithAChannel: "321098765", status: "פעיל" },
+  { id: "8", driverName: "גבי שלמה", residentialArea: "הרצליה", phone: "052.666.7777", additionalPhone: "050.888.9999", associatedWithAChannel: "210987654", status: "לא פעיל" },
+  { id: "9", driverName: "תומר נקש", residentialArea: "כפר סבא", phone: "051.777.8888", additionalPhone: "053.999.0000", associatedWithAChannel: "109876543", status: "פעיל" },
+  { id: "10", driverName: "אלון בן עמי", residentialArea: "רעננה", phone: "050.888.9999", additionalPhone: "054.000.1111", associatedWithAChannel: "098765432", status: "לא פעיל" }
+];
 
-const driversPage = () => {
+const DriversPage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredData, setFilteredData] = useState<DriverData[]>(data);
+
+  const columns: Column<DriverData>[] = [
+    { key: "driverName", header: "שם נהג" },
+    { key: "residentialArea", header: "אזור מגורים" },
+    { key: "phone", header: "טלפון" },
+    { key: "additionalPhone", header: "טלפון נוסף" },
+    { key: "associatedWithAChannel", header: "משוייך לערוץ" },
+    {
+      key: "status",
+      header: "סטטוס",
+      render: (value: string | number) => (
+        <div className={`${
+          value === "לא פעיל"
+            ? "bg-[#FFF5E7] text-[#FF9500]"
+            : "bg-[#F0FFF1] text-[#2EBD32]"
+        } w-20 h-8 flex justify-center items-center rounded-lg`}>
+          {value}
+        </div>
+      ),
+    },
+  ];
+
+  const actions: Action<DriverData>[] = [
+    {
+      icon: "/icons/open-eye.svg",
+      alt: "see",
+      onClick: (row) => console.log("View", row),
+    },
+    {
+      icon: "/icons/file-list-icon.svg",
+      alt: "edit",
+      onClick: (row) => console.log("Edit", row),
+    },
+    {
+      icon: "/icons/report-icon-black.svg",
+      alt: "report",
+      onClick: (row) => console.log("Report", row),
+    },
+  ];
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim() === '') {
+      setFilteredData(data);
+    } else {
+      const lowerCaseQuery = query.toLowerCase();
+      const filtered = data.filter(driver =>
+        driver.driverName.toLowerCase().includes(lowerCaseQuery) ||
+        driver.residentialArea.toLowerCase().includes(lowerCaseQuery) ||
+        driver.phone.includes(query) ||
+        driver.additionalPhone.includes(query) ||
+        driver.associatedWithAChannel.includes(query)
+      );
+      setFilteredData(filtered);
+
+      if(false) console.log(searchQuery);
+    }
+  };
+
   return (
-    <>
-      <div className='mr-80 flex flex-col gap-12'>
-        <section className="flex flex-col gap-6 mx-20 mt-20">
-          <div className="flex justify-between items-center gap-3 text-3xl border-b border-b-[#BCBCBC] relative">
-            <div className="flex gap-6 mr-4">
-              <div className="cursor-pointer py-3 px-1 flex gap-1 relative -bottom-[3px]">
-                <span className="text-lg font-bold">כל הנהגים</span>
-                <span className="text-lg text-[#9B9B9B]">(389)</span>
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <div className="cursor-pointer py-3 px-1 flex items-center gap-1 font-light">
-                <Image src="/icons/filter-icon.svg" alt="filter" width={100} height={100} className="w-4 h-4" />
-                <span className="text-lg">סינון</span>
-              </div>
-              <div className="cursor-pointer py-3 px-1 flex items-center gap-1 font-light">
-                <Image src="/icons/search-icon.svg" alt="filter" width={100} height={100} className="w-4 h-4" />
-                <span className="text-lg">חיפוש</span>
-              </div>
-            </div>
-          </div>
+    <div className="mr-80 flex flex-col gap-12">
+      <section className="flex flex-col gap-6 mx-20 mt-20">
+        <DataTable
+          data={filteredData}
+          columns={columns}
+          actions={actions}
+          showCheckbox={true}
+          title="כל הנהגים"
+          subtitle="(389)"
+          showSearch={true}
+          showFilter={true}
+          onSearch={handleSearch}
+          onFilter={() => console.log("Filter clicked")}
+        />
+      </section>
+    </div>
+  );
+};
 
-          <div className="flex flex-col gap-1">
-            <DataTable data={data} />
-          </div>
-        </section>
-      </div>
-    </>
-  )
-}
-
-export default driversPage
+export default DriversPage;

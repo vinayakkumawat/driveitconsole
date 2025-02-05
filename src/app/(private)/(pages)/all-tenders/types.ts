@@ -18,3 +18,16 @@ export interface ApiTenderData {
     status: string;
     selected_driver: string;
 }
+
+export interface Column<T> {
+    key: keyof T;
+    header: string;
+    render?: (value: T[keyof T], row: T) => React.ReactNode;
+    width?: string;
+}
+
+export interface Action<T> {
+    icon: string;
+    alt: string;
+    onClick: (row: T) => void;
+}

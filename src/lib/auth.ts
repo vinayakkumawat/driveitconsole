@@ -58,11 +58,9 @@ export async function initiateLogin(credentials: LoginCredentials): Promise<{ us
                 const token = btoa(JSON.stringify({ userId: user.id, timestamp: Date.now() }));
                 
                 // Store authentication data
-                localStorage.setItem(TOKEN_KEY, token);
-                localStorage.setItem(USER_KEY, JSON.stringify(user));
-                
-                // Set cookie for server-side authentication
-                document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=86400; samesite=strict`;
+                localStorage.setItem('auth-token', token);
+                localStorage.setItem('auth-user', JSON.stringify(user));
+                sessionStorage.setItem('auth-user', JSON.stringify(user));
                 
                 // Return with empty verificationId to signal direct login
                 return { user, verificationId: 'direct-login' };

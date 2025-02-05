@@ -1,13 +1,21 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { initiateLogin, verifyCode, logout as authLogout, getCurrentUser, getAuthToken } from '@/lib/auth';
-import type { User, LoginCredentials } from '@/lib/types';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  initiateLogin,
+  verifyCode,
+  logout as authLogout,
+  getCurrentUser,
+  getAuthToken,
+} from "@/lib/auth";
+import type { User, LoginCredentials } from "@/lib/types";
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; verificationId?: string }>;
+  login: (
+    credentials: LoginCredentials
+  ) => Promise<{ success: boolean; verificationId?: string }>;
   verifyLoginCode: (verificationId: string, code: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
@@ -26,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentUser = getCurrentUser();
         setUser(currentUser);
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error("Error initializing auth:", error);
       } finally {
         setIsLoading(false);
       }
@@ -43,16 +51,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Check if this was a direct login
-      if (verificationId === 'direct-login') {
+      if (verificationId === "direct-login") {
         setUser(user);
-        window.location.href = '/';
+        sessionStorage.setItem("auth-user", JSON.stringify(user)); // 🔹 Store user session
+        localStorage.setItem(
+          "auth-token",
+          btoa(JSON.stringify({ userId: user.id, timestamp: Date.now() }))
+        );
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        router.push("/");
         return { success: true };
       }
 
       // Normal flow with verification
       return { success: true, verificationId };
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       return { success: false };
     }
   };
@@ -67,30 +83,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set user in context
       setUser(verifiedUser);
 
+      // Wait to ensure local storage is updated
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       // Get the auth token that was set during verification
       const authToken = getAuthToken();
       if (!authToken) {
-        console.error('No auth token found after verification');
+        console.error("No auth token found after verification");
         return false;
       }
 
       // Update server-side authentication
-      try {
-        await fetch('/api/auth', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token: authToken }),
-        });
-      } catch (error) {
-        console.error('Error setting server-side auth:', error);
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: authToken }),
+      });
+
+      const data = await response.json();
+      if (!data.success) {
+        console.error("Server did not set auth-token cookie");
+        return false;
       }
 
-      router.push('/');
+      router.push("/");
       return true;
     } catch (error) {
-      console.error('Verification error:', error);
+      console.error("Verification error:", error);
       return false;
     }
   };
@@ -98,17 +117,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       // Clear server-side authentication first
-      await fetch('/api/auth', { method: 'DELETE' });
+      await fetch("/api/auth", { method: "DELETE" });
       authLogout();
       setUser(null);
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, verifyLoginCode, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, verifyLoginCode, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -117,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

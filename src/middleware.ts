@@ -25,7 +25,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // ✅ Allow special user to access all pages directly in development
   const authToken = request.cookies.get('auth-token')?.value;
+  if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Development mode: Skipping authentication middleware');
+      return NextResponse.next();
+  }
 
   // Redirect to login if no token is present and trying to access protected route
   if (!authToken && pathname !== '/login') {
