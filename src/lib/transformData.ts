@@ -1,4 +1,4 @@
-import { ApiTenderData, TenderData } from "@/app/(private)/(pages)/all-tenders/types";
+import { ApiTenderData, TenderData } from "./types";
 
 export function transformTenderData(apiTenders: ApiTenderData[]): TenderData[] {
   return apiTenders.map(tender => ({
