@@ -22,6 +22,12 @@ interface Action<T> {
   onClick: (row: T) => void;
 }
 
+interface FilterOption {
+  key: string;
+  label: string;
+  type: "text" | "checkbox";
+}
+
 interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
@@ -34,6 +40,8 @@ interface DataTableProps<T> {
   showFilter?: boolean;
   onSearch?: (query: string) => void;
   onFilter?: () => void;
+  filterOptions: FilterOption[];
+  onApplyFilter: (filters: Record<string, string | boolean>) => void;
 }
 
 export function DataTable<T extends { id?: string | number }>({
@@ -48,14 +56,30 @@ export function DataTable<T extends { id?: string | number }>({
   showFilter = true,
   onSearch,
   onFilter,
+  filterOptions,
+  onApplyFilter,
 }: DataTableProps<T>) {
   const [page, setPage] = React.useState(1);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [filters, setFilters] = React.useState<
+    Record<string, string | boolean>
+  >({});
+  const [openFilters, setOpenFilters] = React.useState<Record<string, boolean>>(
+    {}
+  );
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const start = (page - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   const currentData = data.slice(start, end);
+
+  const handleInputChange = (key: string, value: string | boolean) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const toggleFilter = (key: string) => {
+    setOpenFilters((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,7 +113,52 @@ export function DataTable<T extends { id?: string | number }>({
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="px-4 py-6" align="end">
-                  Filter options will come here
+                  <div className="flex flex-col gap-4">
+                    {filterOptions.map(({ key, label, type }) => (
+                      <div key={key} className="flex flex-col gap-2">
+                        <div
+                          className="flex items-center gap-2 cursor-pointer"
+                          onClick={() => toggleFilter(key)}
+                        >
+                          <Image
+                            src={"/icons/arrow-down.svg"}
+                            alt="toggle"
+                            width={12}
+                            height={12}
+                            className={`${openFilters[key] ? '' : 'rotate-90'} w-4 h-4 transition-transform duration-300`}
+                          />
+                          <span className="text-lg">{label}</span>
+                        </div>
+                        {openFilters[key] && (
+                          <div>
+                            {type === "text" ? (
+                              <Input
+                                placeholder={label}
+                                value={(filters[key] as string) || ""}
+                                onChange={(e) =>
+                                  handleInputChange(key, e.target.value)
+                                }
+                                className="w-full h-8"
+                              />
+                            ) : (
+                              <Checkbox
+                                checked={!!filters[key]}
+                                onCheckedChange={(checked) =>
+                                  handleInputChange(key, checked)
+                                }
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      className="mt-4 text-black"
+                      onClick={() => onApplyFilter(filters)}
+                    >
+                      Apply Filters
+                    </Button>
+                  </div>
                 </PopoverContent>
               </Popover>
             )}

@@ -198,6 +198,12 @@ const DriversPage = () => {
     },
   ];
 
+  const filterOptions: { key: string; label: string; type: "text" | "checkbox" }[] = [
+      { key: "id", label: "מספר סידורי", type: "text" },
+      { key: "full_name", label: "שם נהג", type: "text" },
+      { key: "phone", label: "טלפון", type: "text" },
+    ];
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (query.trim() === "") {
@@ -218,6 +224,20 @@ const DriversPage = () => {
     }
   };
 
+  const handleApplyFilter = (filters: Record<string, string | boolean>) => {
+    let filtered = drivers;
+    Object.keys(filters).forEach((key) => {
+      if (filters[key]) {
+        filtered = filtered.filter((driver) => {
+          const filterValue = filters[key];
+          if (typeof filterValue === "boolean") return true;
+          return (driver[key as keyof DriverData] as string).toLowerCase().includes(filterValue.toLowerCase());
+        });
+      }
+    });
+    setFilteredData(filtered);
+  };
+
   return (
     <div className="mr-80 flex flex-col gap-12">
       <section className="flex flex-col gap-6 mx-20 mt-20">
@@ -232,6 +252,8 @@ const DriversPage = () => {
           showFilter={true}
           onSearch={handleSearch}
           onFilter={() => console.log("Filter clicked")}
+          filterOptions={filterOptions}
+          onApplyFilter={handleApplyFilter}
         />
       </section>
     </div>
