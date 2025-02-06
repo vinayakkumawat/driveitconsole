@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
@@ -59,23 +61,26 @@ export function DataTable<T extends { id?: string | number }>({
   filterOptions,
   onApplyFilter,
 }: DataTableProps<T>) {
-  const [page, setPage] = React.useState(1);
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [filters, setFilters] = React.useState<
-    Record<string, string | boolean>
-  >({});
-  const [openFilters, setOpenFilters] = React.useState<Record<string, boolean>>(
-    {}
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string | boolean>>({});
+  const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
+
+  const handleInputChange = useCallback(
+    (key: string, value: string | boolean) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    []
   );
+
+  useEffect(() => {
+    onApplyFilter(filters);
+  }, [filters, onApplyFilter]);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const start = (page - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   const currentData = data.slice(start, end);
-
-  const handleInputChange = (key: string, value: string | boolean) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  };
 
   const toggleFilter = (key: string) => {
     setOpenFilters((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -125,7 +130,9 @@ export function DataTable<T extends { id?: string | number }>({
                             alt="toggle"
                             width={12}
                             height={12}
-                            className={`${openFilters[key] ? '' : 'rotate-90'} w-4 h-4 transition-transform duration-300`}
+                            className={`${
+                              openFilters[key] ? "" : "rotate-90"
+                            } w-4 h-4 transition-transform duration-300`}
                           />
                           <span className="text-lg">{label}</span>
                         </div>
@@ -152,12 +159,6 @@ export function DataTable<T extends { id?: string | number }>({
                         )}
                       </div>
                     ))}
-                    <Button
-                      className="mt-4 text-black"
-                      onClick={() => onApplyFilter(filters)}
-                    >
-                      Apply Filters
-                    </Button>
                   </div>
                 </PopoverContent>
               </Popover>

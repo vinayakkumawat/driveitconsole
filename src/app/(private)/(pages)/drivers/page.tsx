@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Column, Action } from "@/lib/types";
 import { DataTable } from "@/components/theme/DataTable";
 import { fetchApi } from "@/lib/api";
@@ -110,7 +110,6 @@ interface DriverData {
 // ];
 
 const DriversPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [drivers, setDrivers] = useState<DriverData[]>([]);
   const [filteredData, setFilteredData] = useState<DriverData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,6 +152,39 @@ const DriversPage = () => {
 
     loadDrivers();
   }, []);
+
+  const handleApplyFilter = useCallback((filters: Record<string, string | boolean>) => {
+    let filtered = drivers;
+    Object.keys(filters).forEach((key) => {
+      if (filters[key]) {
+        filtered = filtered.filter((driver) => {
+          const filterValue = filters[key];
+          if (typeof filterValue === "boolean") return true;
+          return (driver[key as keyof DriverData] as string)
+            .toLowerCase()
+            .includes((filterValue as string).toLowerCase());
+        });
+      }
+    });
+    setFilteredData(filtered);
+  }, [drivers]);
+
+  const handleSearch = useCallback((query: string) => {
+    if (query.trim() === "") {
+      setFilteredData(drivers);
+    } else {
+      const lowerCaseQuery = query.toLowerCase();
+      const filtered = drivers.filter(
+        (driver) =>
+          driver.full_name.toLowerCase().includes(lowerCaseQuery) ||
+          driver.city.toLowerCase().includes(lowerCaseQuery) ||
+          driver.phone.includes(query) ||
+          driver.additional_phone.includes(query) ||
+          driver.channel.includes(query)
+      );
+      setFilteredData(filtered);
+    }
+  }, [drivers]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -198,50 +230,20 @@ const DriversPage = () => {
     },
   ];
 
-  const filterOptions: { key: string; label: string; type: "text" | "checkbox" }[] = [
-      { key: "id", label: "מספר סידורי", type: "text" },
-      { key: "full_name", label: "שם נהג", type: "text" },
-      { key: "phone", label: "טלפון", type: "text" },
-    ];
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.trim() === "") {
-      setFilteredData(drivers);
-    } else {
-      const lowerCaseQuery = query.toLowerCase();
-      const filtered = drivers.filter(
-        (driver) =>
-          driver.full_name.toLowerCase().includes(lowerCaseQuery) ||
-          driver.city.toLowerCase().includes(lowerCaseQuery) ||
-          driver.phone.includes(query) ||
-          driver.additional_phone.includes(query) ||
-          driver.channel.includes(query)
-      );
-      setFilteredData(filtered);
-
-      if (false) console.log(searchQuery);
-    }
-  };
-
-  const handleApplyFilter = (filters: Record<string, string | boolean>) => {
-    let filtered = drivers;
-    Object.keys(filters).forEach((key) => {
-      if (filters[key]) {
-        filtered = filtered.filter((driver) => {
-          const filterValue = filters[key];
-          if (typeof filterValue === "boolean") return true;
-          return (driver[key as keyof DriverData] as string).toLowerCase().includes(filterValue.toLowerCase());
-        });
-      }
-    });
-    setFilteredData(filtered);
-  };
+  const filterOptions: {
+    key: string;
+    label: string;
+    type: "text" | "checkbox";
+  }[] = [
+    { key: "id", label: "מספר סידורי", type: "text" },
+    { key: "full_name", label: "שם נהג", type: "text" },
+    { key: "phone", label: "טלפון", type: "text" },
+  ];
 
   return (
     <div className="mr-80 flex flex-col gap-12">
       <section className="flex flex-col gap-6 mx-20 mt-20">
-        <DataTable
+      <DataTable
           data={filteredData}
           columns={columns}
           actions={actions}
@@ -251,7 +253,7 @@ const DriversPage = () => {
           showSearch={true}
           showFilter={true}
           onSearch={handleSearch}
-          onFilter={() => console.log("Filter clicked")}
+          onFilter={() => {}}
           filterOptions={filterOptions}
           onApplyFilter={handleApplyFilter}
         />
