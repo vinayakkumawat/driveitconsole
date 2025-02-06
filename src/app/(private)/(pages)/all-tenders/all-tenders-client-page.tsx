@@ -60,7 +60,10 @@ export function TenderPageClient({ initialTenders }: TenderPageClientProps) {
                     actions={actions}
                     title="כל המכרזים"
                     subtitle={`(${tenders.length})`}
-                />
+                    filterOptions={[]}
+                    onApplyFilter={function (filters: Record<string, string | boolean>): void {
+                        throw new Error("Function not implemented.", filters);
+                    } }                />
             </section>
         </div>
     );
