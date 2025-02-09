@@ -23,7 +23,7 @@ const PopupModule = ({ children, form }: PopupModuleProps) => {
             </DialogTrigger>
             <DialogContent className='rounded-tr-3xl flex pr-1 pt-16'>
                 <DialogTitle></DialogTitle>
-                {React.cloneElement(form as React.ReactElement, { onCancel: () => setOpen(false) })}
+                {form && React.cloneElement(form as React.ReactElement, { onCancel: () => setOpen(false) })}
             </DialogContent>
         </Dialog>
     )

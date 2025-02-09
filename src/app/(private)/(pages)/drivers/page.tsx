@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Column, Action } from "@/lib/types";
 import { DataTable } from "@/components/theme/DataTable";
 import { fetchApi } from "@/lib/api";
+import DriverActions from "@/components/Forms/DriverActions";
 
 interface DriverData {
   id: number;
@@ -216,7 +217,7 @@ const DriversPage = () => {
     {
       icon: "/icons/open-eye.svg",
       alt: "see",
-      onClick: (row) => console.log("View", row),
+      form: <DriverActions />,
     },
     {
       icon: "/icons/file-list-icon.svg",

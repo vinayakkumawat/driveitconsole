@@ -47,7 +47,8 @@ export interface Column<T> {
 export interface Action<T> {
     icon: string;
     alt: string;
-    onClick: (row: T) => void;
+    form?: React.ReactNode;
+    onClick?: (row: T) => void;
 }
 
 export interface DataTableProps<T> {

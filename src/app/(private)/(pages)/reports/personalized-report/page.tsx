@@ -15,14 +15,14 @@ const personalizedReportPage = () => {
                     </div>
                     <div className='flex'>
                         <Tabs defaultValue="StationSelection" className="w-full">
-                            <TabsList>
-                                <TabsTrigger value="DriverSelection">בחירת נהג</TabsTrigger>
-                                <TabsTrigger value="StationSelection">בחירת תחנה</TabsTrigger>
+                            <TabsList className='flex justify-end w-full border-b border-[#BCBCBC] bg-background'>
+                                <TabsTrigger value="DriverSelection" className='data-[state=active]:border-b-2 data-[state=active]:border-[#F9CF70]'>בחירת נהג</TabsTrigger>
+                                <TabsTrigger value="StationSelection" className='data-[state=active]:border-b-2 data-[state=active]:border-[#F9CF70]'>בחירת תחנה</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="StationSelection">
+                            <TabsContent value="StationSelection" className='my-6'>
                                 <StationSelection />
                             </TabsContent>
-                            <TabsContent value="DriverSelection">
+                            <TabsContent value="DriverSelection" className='my-6'>
                                 <DriverSelection />
                             </TabsContent>
                         </Tabs>

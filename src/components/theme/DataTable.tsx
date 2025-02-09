@@ -10,19 +10,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-interface Column<T> {
-  key: keyof T;
-  header: string;
-  render?: (value: T[keyof T], row: T) => React.ReactNode;
-  width?: string;
-}
-
-interface Action<T> {
-  icon: string;
-  alt: string;
-  onClick: (row: T) => void;
-}
+import PopupModule from "./PopupModule";
+import { Column, Action } from "@/lib/types";
 
 interface FilterOption {
   key: string;
@@ -231,19 +220,22 @@ export function DataTable<T extends { id?: string | number }>({
                 {actions.length > 0 && (
                   <td className="flex gap-2 justify-center">
                     {actions.map((action, actionIndex) => (
-                      <Button
+                      <PopupModule
                         key={actionIndex}
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => action.onClick(row)}
+                        form={action.form}
                       >
-                        <Image
-                          src={action.icon}
-                          alt={action.alt}
-                          width={25}
-                          height={25}
-                        />
-                      </Button>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                        >
+                          <Image
+                            src={action.icon}
+                            alt={action.alt}
+                            width={25}
+                            height={25}
+                          />
+                        </Button>
+                      </PopupModule>
                     ))}
                   </td>
                 )}
