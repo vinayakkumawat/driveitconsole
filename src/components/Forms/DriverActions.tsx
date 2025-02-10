@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import UrgentlyLeave from "./driver-actions/UrgentlyLeave";
 import GeneralSummaries from "./driver-actions/GeneralSummaries";
+import Payments from "./driver-actions/Payments";
 
 const DriverActions = () => {
   
@@ -124,7 +125,7 @@ const DriverActions = () => {
           </TabsContent>
 
           <TabsContent value="Payments" className="my-6">
-            <div>These components are hidden.</div>
+            <Payments />
           </TabsContent>
           <TabsContent value="Moredetails" className="my-6">
             <div>These components are hidden.</div>
