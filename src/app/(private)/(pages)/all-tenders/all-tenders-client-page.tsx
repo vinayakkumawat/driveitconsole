@@ -62,7 +62,7 @@ export function TenderPageClient({ initialTenders }: TenderPageClientProps) {
                     subtitle={`(${tenders.length})`}
                     filterOptions={[]}
                     onApplyFilter={function (filters: Record<string, string | boolean>): void {
-                        throw new Error("Function not implemented.", filters);
+                        console.log(filters);
                     } }                />
             </section>
         </div>
