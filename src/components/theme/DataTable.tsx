@@ -33,6 +33,7 @@ interface DataTableProps<T> {
   onFilter?: () => void;
   filterOptions: FilterOption[];
   onApplyFilter: (filters: Record<string, string | boolean>) => void;
+  extraButton?: React.ReactNode;
 }
 
 export function DataTable<T extends { id?: string | number }>({
@@ -49,6 +50,7 @@ export function DataTable<T extends { id?: string | number }>({
   onFilter,
   filterOptions,
   onApplyFilter,
+  extraButton,
 }: DataTableProps<T>) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,7 +91,7 @@ export function DataTable<T extends { id?: string | number }>({
               </div>
             </div>
           )}
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
             {showFilter && (
               <Popover>
                 <PopoverTrigger>
@@ -181,6 +183,7 @@ export function DataTable<T extends { id?: string | number }>({
                 </PopoverContent>
               </Popover>
             )}
+            {extraButton && extraButton}
           </div>
         </div>
       )}
