@@ -1,5 +1,5 @@
 export const API_BASE_URL = 'https://api.drive-it.co.il';
-export const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywicm9sZSI6InJvb3QiLCJpYXQiOjE3MzM4NjA3NjIsImV4cCI6MTc2NTQxODM2Mn0.iaXQ5Ha4Jr6fXAcb4Xf-mYjL6hElnh2J6SyTNMdAKzA';
+export const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywicm9sZSI6InJvb3QiLCJpYXQiOjE3MzQ4NjEyNTcsImV4cCI6MTc2NjQxODg1N30.UsjzXcUOmFTRmgyDIPYpd15259S6JKBJFt6dBjZCFrA';
 const CALL2ALL_API_URL = 'https://www.call2all.co.il/ym/api';
 
 interface ApiOptions extends RequestInit {

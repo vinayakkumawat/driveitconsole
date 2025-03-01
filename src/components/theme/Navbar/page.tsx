@@ -18,7 +18,7 @@ const navItems: NavItemType[] = [
         ]
     },
     { id: 4, title: "תשלומים", link: "/payments", icon: "/icons/credit-card-icon.svg", isDropdown: false },
-    { id: 5, title: "נסיעות", link: "#", icon: "/icons/car-icon.svg", isDropdown: false },
+    { id: 5, title: "נסיעות", link: "/travel", icon: "/icons/car-icon.svg", isDropdown: false },
     { id: 6, title: "לקוחות", link: "/customers", icon: "/icons/user-icon-2.svg", isDropdown: false },
     { id: 7, title: "מחירון כללי", link: "/general-price-list", icon: "/icons/list-icon.svg", isDropdown: false }
 ];

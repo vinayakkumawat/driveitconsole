@@ -4,16 +4,16 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Column, Action } from "@/lib/types";
 import { DataTable } from "@/components/theme/DataTable";
 import { fetchApi } from "@/lib/api";
+import { getCurrentCompanyId } from "@/lib/auth";
+// import PaymentActions from "@/components/Forms/PaymentActions";
 
-interface PageData {
+interface PaymentData {
   id: number;
-  serial_number: number;
-  customer_name: string;
-  city: string;
-  phone: string;
-  additional_phone: string;
-  balance_amount: string;
-  status: "פעיל" | "לא פעיל";
+  company_id: number;
+  amount: number;
+  payment_date: string;
+  payment_method: string;
+  status: "מאושר" | "בטיפול" | "נדחה";
 }
 
 // const data: DriverData[] = [
@@ -109,48 +109,36 @@ interface PageData {
 //   },
 // ];
 
-const PaymentsPage = () => {
-  const [payments, setPayments] = useState<PageData[]>([]);
-  const [filteredData, setFilteredData] = useState<PageData[]>([]);
+export default function PaymentsPage() {
+  const [payments, setPayments] = useState<PaymentData[]>([]);
+  const [filteredData, setFilteredData] = useState<PaymentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadData() {
+    async function loadPayments() {
       try {
-        const userStr = localStorage.getItem("auth-user");
-        if (userStr) {
-          // const user = JSON.parse(userStr);
-          // const companyId = user.company_id;
-          const companyId = "1";
-
-          if (!companyId) throw new Error("Company ID is missing.");
-
-          try {
-            const data = await fetchApi("/drivers_view", {
-              params: {
-                company_id: `eq.${companyId}`,
-              },
-            });
-            setPayments(data);
-            setFilteredData(data);
-          } catch (error) {
-            console.error("Error fetching drivers:", error);
-            setError("Error: Try again later.");
-            throw error;
-          }
-        } else {
-          throw new Error("User not found in localStorage.");
+        const companyId = getCurrentCompanyId();
+        if (!companyId) {
+          throw new Error("Company ID not found.");
         }
+
+        const data = await fetchApi("/payments_view", {
+          params: {
+            company_id: `eq.${companyId}`,
+          },
+        });
+        setPayments(data);
+        setFilteredData(data);
       } catch (err) {
         setError("Error");
-        console.error("Error fetching tenders:", err);
+        console.error("Error fetching payments:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadData();
+    loadPayments();
   }, []);
 
   const handleApplyFilter = useCallback((filters: Record<string, string | boolean>) => {
@@ -160,7 +148,7 @@ const PaymentsPage = () => {
         filtered = filtered.filter((driver) => {
           const filterValue = filters[key];
           if (typeof filterValue === "boolean") return true;
-          return (driver[key as keyof PageData] as string)
+          return (driver[key as keyof PaymentData] as string)
             .toLowerCase()
             .includes((filterValue as string).toLowerCase());
         });
@@ -176,11 +164,9 @@ const PaymentsPage = () => {
       const lowerCaseQuery = query.toLowerCase();
       const filtered = payments.filter(
         (data) =>
-          data.customer_name.toLowerCase().includes(lowerCaseQuery) ||
-          data.city.toLowerCase().includes(lowerCaseQuery) ||
-          data.phone.includes(query) ||
-          data.additional_phone.includes(query) ||
-          data.serial_number.toString().includes(query)
+          data.amount.toString().includes(query) ||
+          data.payment_date.includes(query) ||
+          data.payment_method.toLowerCase().includes(lowerCaseQuery)
       );
       setFilteredData(filtered);
     }
@@ -189,20 +175,20 @@ const PaymentsPage = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  const columns: Column<PageData>[] = [
-    { key: "serial_number", header: "מספר סידורי" },
-    { key: "customer_name", header: "שם לקוח" },
-    { key: "phone", header: "טלפון" },
-    { key: "additional_phone", header: "טלפון נוסף" },
-    { key: "city", header: "עיר" },
+  const columns: Column<PaymentData>[] = [
+    { key: "amount", header: "סכום" },
+    { key: "payment_date", header: "תאריך התשלום" },
+    { key: "payment_method", header: "שיטת התשלום" },
     {
       key: "status",
       header: "סטטוס",
       render: (value: string | number) => (
         <div
           className={`${
-            value === "לא פעיל"
+            value === "נדחה"
               ? "bg-[#FFF5E7] text-[#FF9500]"
+              : value === "בטיפול"
+              ? "bg-[#F0FFF1] text-[#2EBD32]"
               : "bg-[#F0FFF1] text-[#2EBD32]"
           } w-20 h-8 flex justify-center items-center rounded-lg`}
         >
@@ -210,10 +196,9 @@ const PaymentsPage = () => {
         </div>
       ),
     },
-    { key: "balance_amount", header: "סכום יתרה" },
   ];
 
-  const actions: Action<PageData>[] = [
+  const actions: Action<PaymentData>[] = [
     {
       icon: "/icons/open-eye.svg",
       alt: "see",
@@ -231,9 +216,9 @@ const PaymentsPage = () => {
     label: string;
     type: "text" | "checkbox";
   }[] = [
-    { key: "serial_number", label: "מספר סידורי", type: "text" },
-    { key: "customer_name", label: "שם לקוח", type: "text" },
-    { key: "phone", label: "טלפון", type: "text" },
+    { key: "amount", label: "סכום", type: "text" },
+    { key: "payment_date", label: "תאריך התשלום", type: "text" },
+    { key: "payment_method", label: "שיטת התשלום", type: "text" },
   ];
 
   return (
@@ -244,7 +229,7 @@ const PaymentsPage = () => {
           columns={columns}
           actions={actions}
           showCheckbox={true}
-          title="כל הנהגים"
+          title="כל התשלומים"
           subtitle="(389)"
           showSearch={true}
           showFilter={true}
@@ -256,6 +241,4 @@ const PaymentsPage = () => {
       </section>
     </div>
   );
-};
-
-export default PaymentsPage;
+}

@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 
 interface CustomerData {
   id: number;
-  serial_number: number;
-  customer_name: string;
+  company_id: number;
+  full_name: string;
   city: string;
   phone: string;
-  payment: string;
-  last_date: string;
+  additional_phone: string;
+  channel: string;
   status: "פעיל" | "לא פעיל";
 }
 
@@ -111,48 +111,43 @@ interface CustomerData {
 //   },
 // ];
 
-const CustomersPage = () => {
+export default function CustomersPage() {
   const [customers, setCustomers] = useState<CustomerData[]>([]);
   const [filteredData, setFilteredData] = useState<CustomerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadDrivers() {
+    async function loadCustomers() {
       try {
-        const userStr = localStorage.getItem("auth-user");
+        const userStr = localStorage.getItem('auth-user');
         if (userStr) {
-          // const user = JSON.parse(userStr);
-          // const companyId = user.company_id;
-          const companyId = "1";
+          const user = JSON.parse(userStr);
+          const companyId = user.company_id;
 
-          if (!companyId) throw new Error("Company ID is missing.");
+          if (!companyId) throw new Error('Company ID is missing.');
 
-          try {
-            const data = await fetchApi("/drivers_view", {
-              params: {
-                company_id: `eq.${companyId}`,
-              },
-            });
-            setCustomers(data);
-            setFilteredData(data);
-          } catch (error) {
-            console.error("Error fetching drivers:", error);
-            setError("Error: Try again later.");
-            throw error;
-          }
+          const data = await fetchApi("/customers_view", {
+            params: {
+              company_id: `eq.${companyId}`,
+            },
+          });
+          setCustomers(data);
+          setFilteredData(data);
+
         } else {
-          throw new Error("User not found in localStorage.");
+          throw new Error('User not found in localStorage.');
         }
+
       } catch (err) {
         setError("Error");
-        console.error("Error fetching tenders:", err);
+        console.error("Error fetching customers:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadDrivers();
+    loadCustomers();
   }, []);
 
   const handleApplyFilter = useCallback(
@@ -182,10 +177,10 @@ const CustomersPage = () => {
         const lowerCaseQuery = query.toLowerCase();
         const filtered = customers.filter(
           (customer) =>
-            customer.serial_number.toString().includes(query) ||
+            customer.id.toString().includes(query) ||
             customer.city.toLowerCase().includes(lowerCaseQuery) ||
             customer.phone.includes(query) ||
-            customer.customer_name.includes(query)
+            customer.full_name.includes(query)
         );
         setFilteredData(filtered);
       }
@@ -197,8 +192,8 @@ const CustomersPage = () => {
   if (error) return <div>Error: {error}</div>;
 
   const columns: Column<CustomerData>[] = [
-    { key: "serial_number", header: "מספר סידורי" },
-    { key: "customer_name", header: "שם לקוח" },
+    { key: "id", header: "מספר סידורי" },
+    { key: "full_name", header: "שם לקוח" },
     { key: "phone", header: "טלפון" },
     {
         key: "status",
@@ -216,9 +211,8 @@ const CustomersPage = () => {
         ),
       },
     { key: "city", header: "עיר" },
-    { key: "payment", header: "תשלום" },
-    { key: "last_date", header: "תאריך אחרון" },
-    
+    { key: "additional_phone", header: "טלפון נוסף" },
+    { key: "channel", header: "ערוץ" },
   ];
 
   const actions: Action<CustomerData>[] = [
@@ -246,7 +240,7 @@ const CustomersPage = () => {
     type: "text" | "checkbox";
   }[] = [
     { key: "id", label: "מספר סידורי", type: "text" },
-    { key: "full_name", label: "שם נהג", type: "text" },
+    { key: "full_name", label: "שם לקוח", type: "text" },
     { key: "phone", label: "טלפון", type: "text" },
   ];
 
@@ -258,7 +252,7 @@ const CustomersPage = () => {
           columns={columns}
           actions={actions}
           showCheckbox={true}
-          title="כל הנהגים"
+          title="כל הלקוחות"
           subtitle="(389)"
           showSearch={true}
           showFilter={true}
@@ -271,6 +265,4 @@ const CustomersPage = () => {
       </section>
     </div>
   );
-};
-
-export default CustomersPage;
+}

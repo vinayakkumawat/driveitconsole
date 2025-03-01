@@ -119,7 +119,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
                 variable_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultVariableCharge) : parseFloat(values.variableCharge?.toString() || '0'),
             };
 
-            const response = await fetch(`${API_BASE_URL}/drivers`, {
+            const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Column, Action } from "@/lib/types";
 import { DataTable } from "@/components/theme/DataTable";
 import { fetchApi } from "@/lib/api";
+import { getCurrentCompanyId } from "@/lib/auth";
 import DriverActions from "@/components/Forms/DriverActions";
 
 interface DriverData {
@@ -110,7 +111,7 @@ interface DriverData {
 //   },
 // ];
 
-const DriversPage = () => {
+export default function DriversPage() {
   const [drivers, setDrivers] = useState<DriverData[]>([]);
   const [filteredData, setFilteredData] = useState<DriverData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,33 +120,21 @@ const DriversPage = () => {
   useEffect(() => {
     async function loadDrivers() {
       try {
-        const userStr = localStorage.getItem("auth-user");
-        if (userStr) {
-          // const user = JSON.parse(userStr);
-          // const companyId = user.company_id;
-          const companyId = "1";
-
-          if (!companyId) throw new Error("Company ID is missing.");
-
-          try {
-            const data = await fetchApi("/drivers_view", {
-              params: {
-                company_id: `eq.${companyId}`,
-              },
-            });
-            setDrivers(data);
-            setFilteredData(data);
-          } catch (error) {
-            console.error("Error fetching drivers:", error);
-            setError("Error: Try again later.");
-            throw error;
-          }
-        } else {
-          throw new Error("User not found in localStorage.");
+        const companyId = getCurrentCompanyId();
+        if (!companyId) {
+          throw new Error("Company ID not found.");
         }
+
+        const data = await fetchApi("/drivers_view", {
+          params: {
+            company_id: `eq.${companyId}`,
+          },
+        });
+        setDrivers(data);
+        setFilteredData(data);
       } catch (err) {
         setError("Error");
-        console.error("Error fetching tenders:", err);
+        console.error("Error fetching drivers:", err);
       } finally {
         setLoading(false);
       }
@@ -261,6 +250,4 @@ const DriversPage = () => {
       </section>
     </div>
   );
-};
-
-export default DriversPage;
+}
