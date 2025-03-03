@@ -1,7 +1,11 @@
+'use client'
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
+import { fetchApi } from "@/lib/api";
+import { getCurrentCompanyId } from "@/lib/auth";
 
 const data = [
   { id: 1, name: "ירושלים בית שמש - כהן", typeOfService: "משלוח", status: "פנוי", postingDate: "01.08.2024", postingTime: "11:01" },
@@ -25,6 +29,44 @@ interface Props {
 }
 
 export default function Home() {
+
+  const [tripSummary, setTripSummary] = React.useState<{
+    status: string;
+    total_trips: number;
+    total_price: number;
+  }[]>([]);
+
+  React.useEffect(() => {
+    const fetchTripSummary = async () => {
+        try {
+          const companyId = getCurrentCompanyId();
+          if (!companyId) {
+            throw new Error("Company ID not found.");
+          }
+  
+          const data = await fetchApi("/daily_trip_summary", {
+            params: {
+              company_id: `eq.${companyId}`,
+            },
+          });
+          setTripSummary(data);
+      } catch (error) {
+        console.error('Error fetching trip summary:', error);
+      }
+    };
+
+    fetchTripSummary();
+  }, []);
+
+  const getStatusCount = (status: string) => {
+    const statusData = tripSummary.find(item => item.status === status);
+    return statusData?.total_trips || 0;
+  };
+
+  const getTotalPrice = () => {
+    return tripSummary.reduce((sum, item) => sum + (item.total_price || 0), 0);
+  };
+
   return (
     <>
       <div className="mr-80 flex flex-col gap-12">
@@ -32,7 +74,7 @@ export default function Home() {
           <section className="flex flex-col gap-4 mt-20 mx-20">
             <div className="flex justify-start items-center gap-3 text-3xl">
               <h2 className="text-foreground font-medium">סטטיסטיקה יומית</h2>
-              <span className="text-accent">5.10.2024</span>
+              <span className="text-accent">{new Date().toLocaleDateString('he-IL')}</span>
             </div>
 
             <div className="flex flex-wrap gap-4">
@@ -42,7 +84,7 @@ export default function Home() {
                   <Image src="/icons/arrow-down.svg" alt="arrow down" width={20} height={20} />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">20</span>
+                  <span className="text-6xl font-bold">{getStatusCount('לא פעיל')}</span>
                   <span className="text-xl font-light">נסיעות פעילות</span>
                 </div>
               </div>
@@ -52,7 +94,7 @@ export default function Home() {
                   <Image src="/icons/arrow-down.svg" alt="arrow down" width={20} height={20} />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">5</span>
+                  <span className="text-6xl font-bold">{getTotalPrice()}</span>
                   <span className="text-xl font-light">נסיעות ממתינות</span>
                 </div>
               </div>

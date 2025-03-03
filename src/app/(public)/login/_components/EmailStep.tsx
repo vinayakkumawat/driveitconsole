@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -15,14 +15,15 @@ interface EmailStepProps {
     setErrorMessage: (message: string) => void;
     errorMessage: string;
 }
-
 const EmailStep: React.FC<EmailStepProps> = ({ onSuccess, setErrorMessage, errorMessage }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const emailForm = useForm<z.infer<typeof emailSchema>>({
         resolver: zodResolver(emailSchema),
         defaultValues: { email: '' },
     });
 
     const handleEmailSubmit = async (data: z.infer<typeof emailSchema>) => {
+        setIsLoading(true);
         setErrorMessage('');
         try {
             const response = await fetch('/api/password-reset/initiate', {
@@ -35,12 +36,13 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSuccess, setErrorMessage, error
                 const errorResponse = await response.json();
                 throw new Error(errorResponse.message || 'Failed to initiate password reset');
             }
-
             const result = await response.json();
             onSuccess(result.userId, result.verificationId);
         } catch (error) {
             console.error(error);
             setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -59,14 +61,16 @@ const EmailStep: React.FC<EmailStepProps> = ({ onSuccess, setErrorMessage, error
                         <FormItem>
                             <FormLabel htmlFor="email-input" className='text-lg'>מייל<span className="text-destructive mr-1">*</span></FormLabel>
                             <FormControl>
-                                <Input className='bg-white' {...field} />
+                                <Input className='bg-white' {...field} disabled={isLoading} />
                             </FormControl>
                             <FormDescription>כתובת המייל איתה נרשמת</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className='w-1/2 text-black'>שליחה</Button>
+                <Button type="submit" className='w-1/2 text-black' disabled={isLoading}>
+                    {isLoading ? 'שולח...' : 'שליחה'}
+                </Button>
             </form>
             {errorMessage && <div className="text-destructive">{errorMessage}</div>}
         </Form>

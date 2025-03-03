@@ -15,7 +15,10 @@ export async function POST(req: Request) {
         // console.log('Found users:', users);
         
         if (!users.length) {
-            return new Response(JSON.stringify({ success: false }), { status: 404 });
+            return new Response(JSON.stringify({ 
+                success: false,
+                message: 'No account found with this email address'
+            }), { status: 404 });
         }
         
         const user = users[0];
@@ -23,7 +26,8 @@ export async function POST(req: Request) {
         const verificationId = btoa(JSON.stringify({ 
             userId: user.id, 
             code,
-            timestamp: Date.now() 
+            timestamp: Date.now(),
+            phone: user.phone // Include phone number for display
         }));
         
         // Send OTP via Call2All
@@ -33,12 +37,16 @@ export async function POST(req: Request) {
         return new Response(JSON.stringify({
             success: true,
             userId: user.id,
-            verificationId
+            verificationId,
+            phone: user.phone // Include phone number in response
         }), {
             headers: { 'Content-Type': 'application/json' }
-        })
+        });
     } catch (error) {
         console.error(error);
-        return new Response(JSON.stringify({ success: false }), { status: 500 });
+        return new Response(JSON.stringify({ 
+            success: false,
+            message: 'Failed to initiate password reset'
+        }), { status: 500 });
     }
 }
