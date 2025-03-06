@@ -31,8 +31,8 @@ interface DataTableProps<T> {
   showFilter?: boolean;
   onSearch?: (query: string) => void;
   onFilter?: () => void;
-  filterOptions: FilterOption[];
-  onApplyFilter: (filters: Record<string, string | boolean>) => void;
+  filterOptions?: FilterOption[];
+  onApplyFilter?: (filters: Record<string, string | boolean>) => void;
   extraButton?: React.ReactNode;
 }
 
@@ -63,9 +63,10 @@ export function DataTable<T extends { id?: string | number }>({
     },
     []
   );
-
   useEffect(() => {
-    onApplyFilter(filters);
+    if (onApplyFilter) {
+      onApplyFilter(filters);
+    }
   }, [filters, onApplyFilter]);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -110,7 +111,7 @@ export function DataTable<T extends { id?: string | number }>({
                 </PopoverTrigger>
                 <PopoverContent className="px-4 py-6" align="end">
                   <div className="flex flex-col gap-4">
-                    {filterOptions.map(({ key, label, type }) => (
+                    {filterOptions?.map(({ key, label, type }) => (
                       <div key={key} className="flex flex-col gap-2">
                         <div
                           className="flex items-center gap-2 cursor-pointer"
@@ -189,21 +190,24 @@ export function DataTable<T extends { id?: string | number }>({
       )}
 
       <table className="w-full">
-        <thead>
-          <tr className="bg-white h-14 border-b border-black">
-            {showCheckbox && <th className="w-10"></th>}
-            {columns.map((column) => (
-              <th
-                key={String(column.key)}
-                className="text-center text-lg font-medium"
-                style={{ width: column.width }}
-              >
-                {column.header}
-              </th>
-            ))}
-            {actions.length > 0 && <th className="w-32"></th>}
-          </tr>
-        </thead>
+        {columns[0].header.length > 0 && (
+          <thead>
+            <tr className="bg-white h-14 border-b border-black">
+              {showCheckbox && <th className="w-10"></th>}
+              {columns.map((column) => (
+                <th
+                  key={String(column.key)}
+                  className="text-center text-lg font-medium"
+                  style={{ width: column.width }}
+                >
+                  {column.header}
+                </th>
+              ))}
+              {actions.length > 0 && <th className="w-32"></th>}
+            </tr>
+          </thead>
+        )}
+
         <tbody>
           {currentData.map((row, rowIndex) => (
             <React.Fragment key={row.id || rowIndex}>
@@ -221,22 +225,19 @@ export function DataTable<T extends { id?: string | number }>({
                   </td>
                 ))}
                 {actions.length > 0 && (
-                  <td className="flex gap-2 justify-center">
+                  <td className="flex gap-2 justify-center w-full">
                     {actions.map((action, actionIndex) => (
-                      <PopupModule
-                        key={actionIndex}
-                        form={action.form}
-                      >
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                        >
+                      <PopupModule key={actionIndex} form={action.form}>
+                        <Button variant="secondary" size="icon" className="w-full">
                           <Image
                             src={action.icon}
                             alt={action.alt}
                             width={25}
                             height={25}
                           />
+                          {action.text && (
+                            <span className="text-lg">{action.text}</span>
+                          )}
                         </Button>
                       </PopupModule>
                     ))}

@@ -47,6 +47,7 @@ export interface Column<T> {
 export interface Action<T> {
     icon: string;
     alt: string;
+    text?: string;
     form?: React.ReactNode;
     onClick?: (row: T) => void;
 }

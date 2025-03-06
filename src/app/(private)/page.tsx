@@ -1,57 +1,62 @@
-'use client'
+"use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { fetchApi } from "@/lib/api";
 import { getCurrentCompanyId } from "@/lib/auth";
-
-const data = [
-  { id: 1, name: "ירושלים בית שמש - כהן", typeOfService: "משלוח", status: "פנוי", postingDate: "01.08.2024", postingTime: "11:01" },
-  { id: 2, name: "ירושלים בית שמש - כהן", typeOfService: "הסעה", status: "תפוס", postingDate: "01.08.2024", postingTime: "11:01" },
-  { id: 3, name: "ירושלים בית שמש - כהן", typeOfService: "מיוחד", status: "פנוי", postingDate: "01.08.2024", postingTime: "11:01" },
-  { id: 4, name: "ירושלים בית שמש - כהן", typeOfService: "משלוח", status: "פנוי", postingDate: "01.08.2024", postingTime: "11:01" },
-  // Add more rows as needed
-];
+import { DataTable } from "@/components/theme/DataTable";
+import { Action, Column } from "@/lib/types";
 
 interface Data {
-  id: number;
-  name: string;
-  typeOfService: string;
+  id?: number;
+  company_id: number;
   status: string;
-  postingDate: string;
-  postingTime: string;
+  total_trips: number;
+  total_price: number;
 }
 
-interface Props {
-  data: Data[];
-}
+// const data: Data[] = [
+//   {
+//     company_id: 1,
+//     status: "לא פעיל", 
+//     total_trips: 1,
+//     total_price: 150.0,
+//   },
+//   {
+//     company_id: 1,
+//     status: "פעיל",
+//     total_trips: 4,
+//     total_price: 400.0,
+//   },
+//   // Add more rows as needed
+// ];
 
 export default function Home() {
-
-  const [tripSummary, setTripSummary] = React.useState<{
-    status: string;
-    total_trips: number;
-    total_price: number;
-  }[]>([]);
+  const [tripSummary, setTripSummary] = React.useState<
+    {
+      company_id: number;
+      status: string;
+      total_trips: number;
+      total_price: number;
+    }[]
+  >([]);
 
   React.useEffect(() => {
     const fetchTripSummary = async () => {
-        try {
-          const companyId = getCurrentCompanyId();
-          if (!companyId) {
-            throw new Error("Company ID not found.");
-          }
-  
-          const data = await fetchApi("/daily_trip_summary", {
-            params: {
-              company_id: `eq.${companyId}`,
-            },
-          });
-          setTripSummary(data);
+      try {
+        const companyId = getCurrentCompanyId();
+        if (!companyId) {
+          throw new Error("Company ID not found.");
+        }
+
+        const data = await fetchApi("/daily_trip_summary", {
+          params: {
+            company_id: `eq.${companyId}`,
+          },
+        });
+        setTripSummary(data);
       } catch (error) {
-        console.error('Error fetching trip summary:', error);
+        console.error("Error fetching trip summary:", error);
       }
     };
 
@@ -59,13 +64,55 @@ export default function Home() {
   }, []);
 
   const getStatusCount = (status: string) => {
-    const statusData = tripSummary.find(item => item.status === status);
+    const statusData = tripSummary.find((item) => item.status === status);
     return statusData?.total_trips || 0;
   };
 
   const getTotalPrice = () => {
     return tripSummary.reduce((sum, item) => sum + (item.total_price || 0), 0);
   };
+
+  const columns: Column<Data>[] = [
+    { key: "company_id", header: "" },
+    { key: "total_trips", header: "" },
+    { key: "total_price", header: "" },
+    {
+      key: "status",
+      header: "",
+      render: (value: string | number | undefined) => (
+        <div
+          className={`${
+            value === "לא פעיל"
+              ? "bg-[#FFF5E7] text-[#FF9500]"
+              : "bg-[#F0FFF1] text-[#2EBD32]"
+          } w-20 h-8 flex justify-center items-center rounded-lg`}
+        >
+          {value}
+        </div>
+      ),
+    },
+  ];
+
+  const actions: Action<Data>[] = [
+    {
+      icon: "/icons/stop-circle.svg",
+      alt: "see",
+      text: "עצירה",
+      form: <div />,
+    },
+    {
+      icon: "/icons/edit-icon.svg",
+      alt: "edit",
+      text: "עריכה",
+      onClick: (row) => console.log("Edit", row),
+    },
+    {
+      icon: "/icons/delete-icon.svg",
+      alt: "report",
+      text: "מחיקה",
+      onClick: (row) => console.log("Report", row),
+    },
+  ];
 
   return (
     <>
@@ -74,43 +121,65 @@ export default function Home() {
           <section className="flex flex-col gap-4 mt-20 mx-20">
             <div className="flex justify-start items-center gap-3 text-3xl">
               <h2 className="text-foreground font-medium">סטטיסטיקה יומית</h2>
-              <span className="text-accent">{new Date().toLocaleDateString('he-IL')}</span>
+              <span className="text-accent">
+                {new Date().toLocaleDateString("he-IL")}
+              </span>
             </div>
 
             <div className="flex flex-wrap gap-4">
-
               <div className="relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 bg-primary">
                 <button className="absolute top-3 left-4">
-                  <Image src="/icons/arrow-down.svg" alt="arrow down" width={20} height={20} />
+                  <Image
+                    src="/icons/arrow-down.svg"
+                    alt="arrow down"
+                    width={20}
+                    height={20}
+                  />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">{getStatusCount('לא פעיל')}</span>
+                  <span className="text-6xl font-bold">
+                    {getStatusCount("לא פעיל")}
+                  </span>
                   <span className="text-xl font-light">נסיעות פעילות</span>
                 </div>
               </div>
 
               <div className="relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 bg-white border-r-4 border-r-primary">
                 <button className="absolute top-3 left-4">
-                  <Image src="/icons/arrow-down.svg" alt="arrow down" width={20} height={20} />
+                  <Image
+                    src="/icons/arrow-down.svg"
+                    alt="arrow down"
+                    width={20}
+                    height={20}
+                  />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">{getTotalPrice()}</span>
+                  <span className="text-6xl font-bold">
+                    {getStatusCount("לא פעיל")}
+                  </span>
                   <span className="text-xl font-light">נסיעות ממתינות</span>
                 </div>
               </div>
 
               <div className="relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 bg-white border-r-4 border-r-primary">
                 <button className="absolute top-3 left-4">
-                  <Image src="/icons/arrow-down.svg" alt="arrow down" width={20} height={20} />
+                  <Image
+                    src="/icons/arrow-down.svg"
+                    alt="arrow down"
+                    width={20}
+                    height={20}
+                  />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">8</span>
+                  <span className="text-6xl font-bold">
+                    {getStatusCount("לא פעיל")}
+                  </span>
                   <span className="text-xl font-light">נסיעות שהסתיימו</span>
                 </div>
               </div>
 
               <button className="h-48 w-72 p-8 bg-[#ECE9E2] flex justify-center items-center border-2 border-primary rounded-lg hover:drop-shadow-lg transition-all duration-200">
-                <span className="text-2xl font-medium">סכום כסף?</span>
+                <span className="text-2xl font-medium">{getTotalPrice()}</span>
               </button>
             </div>
           </section>
@@ -118,59 +187,22 @@ export default function Home() {
           <section className="flex flex-col gap-6 mx-20 mb-20">
             <div className="flex justify-start items-center gap-3 text-3xl">
               <h2 className="text-foreground font-medium">נסיעות פעילות</h2>
-              <span className="text-accent">(20)</span>
+              <span className="text-accent">({tripSummary.length})</span>
             </div>
 
             <div className="">
-              <DataTable data={data} />
+              <DataTable
+                data={tripSummary}
+                columns={columns}
+                showCheckbox={true}
+                actions={actions}
+                showSearch={false}
+                showFilter={false}
+              />
             </div>
           </section>
         </div>
       </div>
     </>
   );
-}
-
-const DataTable = ({ data }: Props) => {
-  return (
-    <table className='w-full'>
-      <thead className=''></thead>
-      <tbody className=''>
-        {data.map((item, index) => (
-          <React.Fragment key={index}>
-            <tr className='bg-white h-14 text-lg text-center'>
-              <td>
-                <Image src="/icons/three-ellipse.svg" alt="edit" width={5} height={5} />
-              </td>
-              <td className="flex items-center">
-                <Checkbox className="w-5 h-5" />
-              </td>
-              <td>{item.name}</td>
-              <td>{item.typeOfService}</td>
-              <td>{item.postingDate}</td>
-              <td>
-                {item.status === 'תפוס' && <div className='bg-[#FFE7E7] w-20 h-8 flex justify-center items-center rounded-lg'><span className='text-[#FF0004]'>{item.status}</span></div>}
-                {item.status === 'פנוי' && <div className='bg-[#F0FFF1] w-20 h-8 flex justify-center items-center rounded-lg'><span className='text-[#2EBD32]'>{item.status}</span></div>}
-              </td>
-              <td className='flex justify-end gap-2 pl-8'>
-                <Button className='text-lg font-light' variant={"secondary"} size={"default"}>
-                  <Image src="/icons/stop-circle.svg" alt="stop" width={20} height={20} />
-                  עצירה
-                </Button>
-                <Button className='text-lg font-light' variant={"secondary"} size={"default"}>
-                  <Image src="/icons/edit-icon.svg" alt="edit" width={20} height={20} />
-                  עריכה
-                </Button>
-                <Button className='text-lg font-light' variant={"secondary"} size={"default"}>
-                  <Image src="/icons/delete-icon.svg" alt="delete" width={20} height={20} />
-                  מחיקה
-                </Button>
-              </td>
-            </tr>
-            <tr className='h-1'></tr>
-          </React.Fragment>
-        ))}
-      </tbody>
-    </table>
-  )
 }
