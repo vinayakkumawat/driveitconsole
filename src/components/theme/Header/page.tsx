@@ -2,6 +2,7 @@ import React from 'react'
 import { Button } from '../../ui/button'
 import PopupModule from '../PopupModule'
 import NewDriver from '@/components/Forms/NewDriver'
+import TripForm from '@/components/Forms/TripForm';
 
 interface HeaderProps {
     onCancel: () => void;
@@ -11,7 +12,7 @@ const Header = ({onCancel}: HeaderProps) => {
     return (
         <div className="absolute w-screen bg-white p-4 pr-80">
             <div className="flex gap-4 mx-20">
-                <PopupModule form={<div>Form Component</div>}>
+                <PopupModule form={<TripForm onCancel={onCancel} />}>
                     <Button className="px-12 bg-secondary text-[#3E404C] xl:text-lg">נסיעה חדשה</Button>
                 </PopupModule>
 
