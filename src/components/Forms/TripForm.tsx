@@ -138,9 +138,9 @@ const TripForm = ({ onCancel }: TripProps) => {
               <div className="col-span-2">
                 <FormDataInputSingleElement
                   form={form}
-                  name="customer_id"
+                  name="channel"
                   label="שיוך לערוץ"
-                  inputType="text"
+                  inputType="channel"
                   placeholder="ברירת מחדל - פרסום בכל הערוצים"
                 />
               </div>
@@ -149,13 +149,12 @@ const TripForm = ({ onCancel }: TripProps) => {
                 name="service_type"
                 label="סוג שירות"
                 inputType="select"
-                required
               />
               <FormDataInputSingleElement
                 form={form}
                 name="driver_id"
                 label="שיוך הנסיעה לנהג"
-                inputType="select"
+                inputType="driver"
                 required
               />
               <FormDataInputSingleElement

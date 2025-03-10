@@ -17,12 +17,27 @@ import { Calendar } from "./calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { fetchApi } from "@/lib/api";
+import { getCurrentCompanyId } from "@/lib/auth";
+
+interface Driver {
+  id: number;
+  company_id: number;
+  full_name: string;
+  phone: string;
+}
+
+interface Channel {
+  channel_id: number;
+  channel_number: string;
+  channel_nickname: string;
+  default_channel: boolean;
+}
 
 interface Props<T extends FieldValues> {
   form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
-  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street";
+  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street" | "driver" | "channel";
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -41,9 +56,65 @@ const FormDataInputSingleElement = <T extends FieldValues>({
   const [date, setDate] = React.useState<Date>();
   const [cities, setCities] = useState<string[]>([]);
   const [streets, setStreets] = useState<string[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [channels, setChannels] = useState<Channel[]>([]);
   const [showCities, setShowCities] = useState(false);
   const [showStreets, setShowStreets] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const companyId = getCurrentCompanyId();
+        if (!companyId) {
+          console.error("No company ID found");
+          return;
+        }
+
+        const data = await fetchApi("/drivers_view", {
+          params: {
+            select: "id,company_id,full_name,phone",
+            company_id: `eq.${companyId}`,
+            order: "full_name.asc"
+          }
+        });
+        setDrivers(data);
+      } catch (error) {
+        console.error("Error fetching drivers:", error);
+      }
+    };
+
+    if (inputType === "driver") {
+      fetchDrivers();
+    }
+  }, [inputType]);
+
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        const companyId = getCurrentCompanyId();
+        if (!companyId) {
+          console.error("No company ID found");
+          return;
+        }
+
+        const data = await fetchApi("/channels", {
+          params: {
+            select: "channel_id,channel_number,channel_nickname,default_channel",
+            company_id: `eq.${companyId}`,
+            order: "default_channel.desc,channel_number.asc"
+          }
+        });
+        setChannels(data);
+      } catch (error) {
+        console.error("Error fetching channels:", error);
+      }
+    };
+
+    if (inputType === "channel") {
+      fetchChannels();
+    }
+  }, [inputType]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -115,6 +186,21 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                     <SelectItem value="ערוץ 112548">ערוץ 112548</SelectItem>
                     <SelectItem value="ערוץ 112544">ערוץ 112548</SelectItem>
                     <SelectItem value="ערוץ 112542">ערוץ 112548</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : inputType === "driver" ? (
+                <Select dir="rtl" onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString() || "0"}>
+                  <SelectTrigger className="w-full h-8">
+                    <SelectValue>
+                      {field.value === 0 || !field.value ? "משרד-מוקדן" : drivers.find(d => d.id === field.value)?.full_name}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="">
+                    {drivers.map((driver) => (
+                      <SelectItem key={driver.id} value={driver.id.toString()}>
+                        {`${driver.full_name} | ${driver.phone}`}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               ) : inputType === "date" ? (
@@ -204,6 +290,24 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                     </div>
                   )}
                 </div>
+              ) : inputType === "channel" ? (
+                <Select dir="rtl" onValueChange={field.onChange} value={field.value?.toString() || "0"}>
+                  <SelectTrigger className="w-full h-8">
+                    <SelectValue>
+                      {field.value === "0" || !field.value ? "ברירת מחדל - פרסום בכל הערוצים" : 
+                        channels.find(c => c.channel_id.toString() === field.value)?.channel_number + " | " + 
+                        channels.find(c => c.channel_id.toString() === field.value)?.channel_nickname}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="">
+                    <SelectItem value="0">ברירת מחדל - פרסום בכל הערוצים</SelectItem>
+                    {channels.map((channel) => (
+                      <SelectItem key={channel.channel_id} value={channel.channel_id.toString()}>
+                        {`${channel.channel_number} | ${channel.channel_nickname}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <>
                   <Input
