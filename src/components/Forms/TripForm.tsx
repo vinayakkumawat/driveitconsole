@@ -189,25 +189,25 @@ const TripForm = ({ onCancel }: TripProps) => {
                 form={form}
                 name="from_city"
                 label="מעיר"
-                inputType="text"
+                inputType="city"
               />
               <FormDataInputSingleElement
                 form={form}
                 name="to_city"
                 label="לעיר"
-                inputType="text"
+                inputType="city"
               />
               <FormDataInputSingleElement
                 form={form}
                 name="from_full_address"
                 label="כתובת"
-                inputType="text"
+                inputType="street"
               />
               <FormDataInputSingleElement
                 form={form}
                 name="to_full_address"
                 label="כתובת"
-                inputType="text"
+                inputType="street"
               />
             </div>
           </div>

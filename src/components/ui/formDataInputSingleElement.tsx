@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "./form";
 import { Input } from "./input";
 import Image from "next/image";
@@ -16,12 +16,13 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "./calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { fetchApi } from "@/lib/api";
 
 interface Props<T extends FieldValues> {
   form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
-  inputType: "text" | "number" | "email" | "select" | "date" | "time";
+  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street";
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -37,7 +38,61 @@ const FormDataInputSingleElement = <T extends FieldValues>({
   required,
   disabled,
 }: Props<T>) => {
-    const [date, setDate] = React.useState<Date>();
+  const [date, setDate] = React.useState<Date>();
+  const [cities, setCities] = useState<string[]>([]);
+  const [streets, setStreets] = useState<string[]>([]);
+  const [showCities, setShowCities] = useState(false);
+  const [showStreets, setShowStreets] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (searchQuery.length >= 2) {
+        try {
+          const data = await fetchApi("/city_summary", {
+            params: {
+              grouping_value: `like.${searchQuery}%`
+            }
+          });
+          setCities(data.map((item: { grouping_value: string }) => item.grouping_value.trim()));
+          setShowCities(true);
+        } catch (error) {
+          console.error("Error fetching cities:", error);
+        }
+      } else {
+        setCities([]);
+        setShowCities(false);
+      }
+    };
+
+    const fetchStreets = async () => {
+      if (searchQuery.length >= 2) {
+        try {
+          const data = await fetchApi("/street_summary", {
+            params: {
+              grouping_value: `like.${searchQuery}%`
+            }
+          });
+          setStreets(data.map((item: { grouping_value: string }) => item.grouping_value.trim()));
+          setShowStreets(true);
+        } catch (error) {
+          console.error("Error fetching streets:", error);
+        }
+      } else {
+        setStreets([]);
+        setShowStreets(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      if (inputType === "city") {
+        fetchCities();
+      } else if (inputType === "street") {
+        fetchStreets();
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, inputType]);
 
   return (
     <FormField
@@ -68,11 +123,11 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-full justify-start text-left font-normal h-8",
+                        "w-full justify-start text-right font-normal h-8",
                         !date && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon />
+                      <CalendarIcon className="ml-2" />
                       {date ? format(date, "PPP") : <span></span>}
                     </Button>
                   </PopoverTrigger>
@@ -85,6 +140,70 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                     />
                   </PopoverContent>
                 </Popover>
+              ) : inputType === "city" ? (
+                <div className="relative">
+                  <Input
+                    placeholder={placeholder}
+                    {...field}
+                    className="bg-background w-full h-8"
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setSearchQuery(e.target.value);
+                    }}
+                    onFocus={() => setShowCities(true)}
+                    onBlur={() => setTimeout(() => setShowCities(false), 200)}
+                  />
+                  {showCities && cities.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                      {cities.map((city, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            field.onChange(city);
+                            setSearchQuery(city);
+                            setShowCities(false);
+                          }}
+                        >
+                          {city}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : inputType === "street" ? (
+                <div className="relative">
+                  <Input
+                    placeholder={placeholder}
+                    {...field}
+                    className="bg-background w-full h-8"
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setSearchQuery(e.target.value);
+                    }}
+                    onFocus={() => setShowStreets(true)}
+                    onBlur={() => setTimeout(() => setShowStreets(false), 200)}
+                  />
+                  {showStreets && streets.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                      {streets.map((street, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            field.onChange(street);
+                            setSearchQuery(street);
+                            setShowStreets(false);
+                          }}
+                        >
+                          {street}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <>
                   <Input
