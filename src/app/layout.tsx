@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from '@/contexts/auth-context';
+import { Toaster } from "@/components/ui/sonner"
 
 const ploni = localFont({
   src: [
@@ -68,6 +69,7 @@ export default function RootLayout({
           <main className="">
             {children}
           </main>
+          <Toaster />
         </AuthProvider>
       </body>
     </html>

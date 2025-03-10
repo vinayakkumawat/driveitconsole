@@ -33,15 +33,23 @@ interface Channel {
   default_channel: boolean;
 }
 
+interface Customer {
+  customerid: number;
+  firstname: string;
+  lastname: string | null;
+  phone: string | null;
+}
+
 interface Props<T extends FieldValues> {
   form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
-  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street" | "driver" | "channel";
+  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street" | "driver" | "channel" | "customer";
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
   txtInput?: string;
+  selectOptions?: { value: string; label: string }[];
 }
 
 const FormDataInputSingleElement = <T extends FieldValues>({
@@ -52,12 +60,14 @@ const FormDataInputSingleElement = <T extends FieldValues>({
   placeholder,
   required,
   disabled,
+  selectOptions,
 }: Props<T>) => {
   const [date, setDate] = React.useState<Date>();
   const [cities, setCities] = useState<string[]>([]);
   const [streets, setStreets] = useState<string[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [showCities, setShowCities] = useState(false);
   const [showStreets, setShowStreets] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,6 +100,25 @@ const FormDataInputSingleElement = <T extends FieldValues>({
   }, [inputType]);
 
   useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const data = await fetchApi("/customer", {
+          params: {
+            select: "customerid,firstname,lastname,phone"
+          }
+        });
+        setCustomers(data);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+      }
+    };
+
+    if (inputType === "customer") {
+      fetchCustomers();
+    }
+  }, [inputType]);
+
+  useEffect(() => {
     const fetchChannels = async () => {
       try {
         const companyId = getCurrentCompanyId();
@@ -106,6 +135,14 @@ const FormDataInputSingleElement = <T extends FieldValues>({
           }
         });
         setChannels(data);
+        
+        // Set default channel if one exists and no value is currently selected
+        if (inputType === "channel" && (!form.getValues(name) || form.getValues(name) === "")) {
+          const defaultChannel = data.find((channel: Channel) => channel.default_channel);
+          if (defaultChannel) {
+            form.setValue(name, defaultChannel.channel_id.toString());
+          }
+        }
       } catch (error) {
         console.error("Error fetching channels:", error);
       }
@@ -114,7 +151,7 @@ const FormDataInputSingleElement = <T extends FieldValues>({
     if (inputType === "channel") {
       fetchChannels();
     }
-  }, [inputType]);
+  }, [inputType, form, name]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -178,14 +215,36 @@ const FormDataInputSingleElement = <T extends FieldValues>({
           <FormControl>
             <div className="relative">
               {inputType === "select" ? (
-                <Select dir="rtl">
+                <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="w-full h-8">
-                    <SelectValue placeholder="בחר ערוץ" />
+                    <SelectValue placeholder={placeholder} />
                   </SelectTrigger>
                   <SelectContent className="">
-                    <SelectItem value="ערוץ 112548">ערוץ 112548</SelectItem>
-                    <SelectItem value="ערוץ 112544">ערוץ 112548</SelectItem>
-                    <SelectItem value="ערוץ 112542">ערוץ 112548</SelectItem>
+                    {selectOptions?.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : inputType === "customer" ? (
+                <Select dir="rtl" onValueChange={field.onChange} value={field.value?.toString() || ""}>
+                  <SelectTrigger className="w-full h-8">
+                    <SelectValue>
+                      {field.value ? 
+                        customers.find(c => c.customerid.toString() === field.value)?.firstname || "בחר לקוח" 
+                        : "בחר לקוח"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="">
+                    {customers.map((customer) => (
+                      <SelectItem 
+                        key={customer.customerid} 
+                        value={customer.customerid.toString()}
+                      >
+                        {`${customer.firstname} ${customer.lastname ? customer.lastname : ''} ${customer.phone ? ` | ${customer.phone}` : ''}`}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               ) : inputType === "driver" ? (
@@ -294,15 +353,17 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                 <Select dir="rtl" onValueChange={field.onChange} value={field.value?.toString() || "0"}>
                   <SelectTrigger className="w-full h-8">
                     <SelectValue>
-                      {field.value === "0" || !field.value ? "ברירת מחדל - פרסום בכל הערוצים" : 
+                      {field.value === "0" || 
                         channels.find(c => c.channel_id.toString() === field.value)?.channel_number + " | " + 
                         channels.find(c => c.channel_id.toString() === field.value)?.channel_nickname}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="">
-                    <SelectItem value="0">ברירת מחדל - פרסום בכל הערוצים</SelectItem>
                     {channels.map((channel) => (
-                      <SelectItem key={channel.channel_id} value={channel.channel_id.toString()}>
+                      <SelectItem 
+                        key={channel.channel_id} 
+                        value={channel.channel_id.toString()}
+                      >
                         {`${channel.channel_number} | ${channel.channel_nickname}`}
                       </SelectItem>
                     ))}

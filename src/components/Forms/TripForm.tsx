@@ -4,12 +4,14 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth-context";
+import { fetchApi } from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import FormDataInputSingleElement from "@/components/ui/formDataInputSingleElement";
 import { Label } from "../ui/label";
-import { API_BASE_URL, API_TOKEN } from "@/lib/api";
 import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
 import { Checkbox } from "../ui/checkbox";
@@ -46,10 +48,11 @@ interface TripProps {
 }
 
 const TripForm = ({ onCancel }: TripProps) => {
+  const { user } = useAuth();
   const form = useForm<TripFormValues>({
     resolver: zodResolver(TripFormSchema),
     defaultValues: {
-      company_id: undefined,
+      company_id: user?.company_id ? Number(user.company_id) : 0,
       driver_id: undefined,
       service_type: "",
       price: 0,
@@ -62,14 +65,14 @@ const TripForm = ({ onCancel }: TripProps) => {
       to_city: "",
       to_full_address: "",
       notes_to_driver: "",
-      scheduled_immediate: "",
+      scheduled_immediate: "Immediate",
       date: "",
       time: "",
       sendremindertodriver: false,
       bringing_driver_id: undefined,
       driver_phone_number: "",
       dynamic_phone: "",
-      user_id: undefined,
+      user_id: user?.id ? Number(user.id) : 0,
       scheduled: false,
     },
   });
@@ -78,48 +81,55 @@ const TripForm = ({ onCancel }: TripProps) => {
     try {
       const token = localStorage.getItem("auth-token");
       if (!token) {
-        throw new Error("Authentication token not found");
+        toast.error("Authentication token not found");
+        return;
+      }
+
+      // Format the date and time if scheduled
+      let formattedDate = values.date;
+      let formattedTime = values.time;
+      if (values.scheduled && values.date && values.time) {
+        formattedDate = new Date(values.date).toISOString().split('T')[0];
+        formattedTime = values.time + ":00"; // Add seconds for proper format
       }
 
       const formattedData = {
-        company_id: "",
-        first_name: "",
-        last_name: "",
-        address: "",
-        city: values.from_city,
-        serial_number: "",
-        channel: "",
-        vehicle_type: "",
-        number_of_seats: 0,
-        category: "",
-        vehicle_status: "",
-        email: "",
-        phone: "",
-        additional_phone: "",
-        fixed_charge: 0,
-        variable_charge: 0,
-        scheduled: values.scheduled,
+        company_id: values.company_id,
+        ...(values.driver_id && { driver_id: values.driver_id }),
+        ...(values.service_type && { service_type: values.service_type }),
+        ...(values.price && { price: values.price }),
+        ...(values.channel && { channel: values.channel }),
+        ...(values.customer_type && { customer_type: values.customer_type }),
+        ...(values.customer_id && { customer_id: values.customer_id }),
+        ...(values.contact_phone && { contact_phone: values.contact_phone }),
+        ...(values.from_city && { from_city: values.from_city }),
+        ...(values.from_full_address && { from_full_address: values.from_full_address }),
+        ...(values.to_city && { to_city: values.to_city }),
+        ...(values.to_full_address && { to_full_address: values.to_full_address }),
+        ...(values.notes_to_driver && { notes_to_driver: values.notes_to_driver }),
+        scheduled_immediate: values.scheduled ? "Scheduled" : "Immediate",
+        ...(values.scheduled && values.date && { date: formattedDate }),
+        ...(values.scheduled && values.time && { time: formattedTime }),
+        ...(values.sendremindertodriver && { sendremindertodriver: values.sendremindertodriver }),
+        ...(values.bringing_driver_id && { bringing_driver_id: values.bringing_driver_id }),
+        ...(values.driver_phone_number && { driver_phone_number: values.driver_phone_number }),
+        ...(values.dynamic_phone && { dynamic_phone: values.dynamic_phone }),
+        ...(values.user_id && { user_id: values.user_id })
       };
 
-      const response = await fetch(
-        `${API_BASE_URL}/rpc/create_driver_with_charge`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_TOKEN}`,
-          },
-          body: JSON.stringify(formattedData),
-        }
-      );
+      await fetchApi('/trip_data', {
+        method: 'POST',
+        headers: {
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(formattedData)
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to create driver");
-      }
-
+      toast.success("Trip created successfully");
       onCancel();
     } catch (error) {
-      console.error("Error creating driver:", error);
+      console.error("Error creating trip:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create trip");
     }
   }
 
@@ -149,6 +159,7 @@ const TripForm = ({ onCancel }: TripProps) => {
                 name="service_type"
                 label="סוג שירות"
                 inputType="select"
+                selectOptions={[{ value: "נסיעה", label: "נסיעה" }, { value: "מיוחד", label: "מיוחד" }, { value: "אחר", label: "אחר" }]}
               />
               <FormDataInputSingleElement
                 form={form}
@@ -162,19 +173,20 @@ const TripForm = ({ onCancel }: TripProps) => {
                 name="customer_type"
                 label="סוג לקוח"
                 inputType="select"
+                selectOptions={[{ value: "לקוח מזדמן", label: "לקוח מזדמן" }, { value: "לקוח קבוע", label: "לקוח קבוע" }]}
               />
               <FormDataInputSingleElement
                 form={form}
                 name="customer_id"
                 label="בחירת לקוח"
-                inputType="select"
+                inputType="customer"
               />
               <div className="col-span-2">
                 <FormDataInputSingleElement
                   form={form}
                   name="contact_phone"
                   label="טלפון ליצירת קשר"
-                  inputType="select"
+                  inputType="text"
                 />
               </div>
             </div>
