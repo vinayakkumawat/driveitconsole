@@ -136,7 +136,7 @@ const TripForm = ({ onCancel }: TripProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-        <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-scroll p-1">
+        <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-scroll p-1">
           <div className="w-full flex flex-col gap-2">
             <Label className="font-bold">נסיעה חדשה</Label>
           </div>
@@ -163,7 +163,7 @@ const TripForm = ({ onCancel }: TripProps) => {
               />
               <FormDataInputSingleElement
                 form={form}
-                name="driver_id"
+                name="bringing_driver_id"
                 label="שיוך הנסיעה לנהג"
                 inputType="driver"
                 required
