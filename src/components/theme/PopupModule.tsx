@@ -21,7 +21,7 @@ const PopupModule = ({ children, form }: PopupModuleProps) => {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className='rounded-tr-3xl flex pr-1 pt-16 h-[90vh] overflow-y-scroll no-scrollbar'>
+            <DialogContent className='rounded-tr-3xl flex pr-1 pt-16 max-h-[90vh] overflow-y-auto'>
                 <DialogTitle></DialogTitle>
                 {form && React.cloneElement(form as React.ReactElement, { onCancel: () => setOpen(false) })}
             </DialogContent>

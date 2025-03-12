@@ -143,7 +143,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
 
-                <div className='flex flex-col gap-4 max-h-[70vh] overflow-y-scroll no-scrollbar'>
+                <div className='flex flex-col gap-4 max-h-[70vh] overflow-y-scroll'>
 
                     <div className='w-full flex flex-col gap-2'>
                         <Label className='font-bold'>
