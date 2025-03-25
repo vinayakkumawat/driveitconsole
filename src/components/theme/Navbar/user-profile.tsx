@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
 import { fetchCompanyLogo } from '@/lib/api';
+import Link from 'next/link';
 
 export function UserProfile() {
   const { logout } = useAuth();
@@ -60,10 +61,12 @@ export function UserProfile() {
           <Image src="/icons/sign-out.svg" alt="icon" width={20} height={20} />
           יציאה
         </Button>
-        <Button className="bg-[#DDDEE4] text-lg font-light text-black">
-          <Image src="/icons/gear-with-pencil.svg" alt="icon" width={20} height={20} />
-          הגדרות
-        </Button>
+        <Link href="/settings">
+          <Button className="bg-[#DDDEE4] text-lg font-light text-black">
+            <Image src="/icons/gear-with-pencil.svg" alt="icon" width={20} height={20} />
+            הגדרות
+          </Button>
+        </Link>
       </div>
     </div>
   );
