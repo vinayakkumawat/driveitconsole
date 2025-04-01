@@ -198,13 +198,13 @@ const TripForm = ({ onCancel }: TripProps) => {
               {/* Using Child Component */}
               <FormDataInputSingleElement
                 form={form}
-                name="from_city"
+                name="date"
                 label="מעיר"
                 inputType="city"
               />
               <FormDataInputSingleElement
                 form={form}
-                name="to_city"
+                name="time"
                 label="לעיר"
                 inputType="city"
               />
