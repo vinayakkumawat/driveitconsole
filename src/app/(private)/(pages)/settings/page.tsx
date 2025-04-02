@@ -4,6 +4,8 @@ import React from "react";
 import SettingsMenu from "@/components/SettingsMenu";
 import { useState } from "react";
 import CommonAbbreviations from "./_components/CommonAbbreviations";
+import BillingSetup from "./_components/BillingSetup";
+import Callers from "./_components/Callers";
 
 const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState("shortcuts");
@@ -27,8 +29,8 @@ const SettingsPage = () => {
             <div className="text-right">
               <div className="">
                 {activeSection === "shortcuts" && (<CommonAbbreviations />)}
-                {activeSection === "billing" && "הגדרת חיוב"}
-                {activeSection === "operators" && "מוקדנים"}
+                {activeSection === "billing" && (<BillingSetup />)}
+                {activeSection === "operators" && (<Callers />)}
                 {activeSection === "channels" && "ערוצים"}
                 {activeSection === "admin" && "Admin"}
                 {activeSection === "stations" && "תחנות"}
