@@ -45,7 +45,7 @@ const Drivers = () => {
       );
       setFilteredData(filtered);
     }
-  }, []);
+  }, [mockDrivers]);
 
   const handleApplyFilter = useCallback(
     (filters: Record<string, string | boolean>) => {
@@ -63,7 +63,7 @@ const Drivers = () => {
       });
       setFilteredData(filtered);
     },
-    []
+    [mockDrivers]
   );
 
   const columns: Column<DriverData>[] = [
