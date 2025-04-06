@@ -1,11 +1,15 @@
 "use client";
 
 import React from "react";
-import SettingsMenu from "@/components/SettingsMenu";
+import SettingsMenu from "@/components/theme/SettingsMenu";
 import { useState } from "react";
 import CommonAbbreviations from "./_components/CommonAbbreviations";
 import BillingSetup from "./_components/BillingSetup";
 import Callers from "./_components/Callers";
+import Channels from "./_components/Channels";
+import Stations from "./_components/Stations";
+import Drivers from "./_components/Drivers";
+import NewStation from "./_components/NewStation";
 
 const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState("shortcuts");
@@ -31,11 +35,11 @@ const SettingsPage = () => {
                 {activeSection === "shortcuts" && (<CommonAbbreviations />)}
                 {activeSection === "billing" && (<BillingSetup />)}
                 {activeSection === "operators" && (<Callers />)}
-                {activeSection === "channels" && "ערוצים"}
-                {activeSection === "admin" && "Admin"}
-                {activeSection === "stations" && "תחנות"}
-                {activeSection === "drivers" && "נהגים"}
-                {activeSection === "new-station" && "תחנה חדשה"}
+                {activeSection === "channels" && (<Channels />)}
+                {activeSection === "admin" && "Stations"}
+                {activeSection === "stations" && (<Stations />)}
+                {activeSection === "drivers" && (<Drivers />)}
+                {activeSection === "newStation" && (<NewStation />)}
               </div>
             </div>
           </div>

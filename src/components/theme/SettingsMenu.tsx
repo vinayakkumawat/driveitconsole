@@ -105,17 +105,17 @@ const SettingsMenu = ({
                 height={20}
               />
             }
-            label="Admin"
-            active={activeSection === "admin"}
-            onClick={() => onSectionChange("admin")}
+            label="תחנות"
+            active={activeSection === "stations"}
+            onClick={() => onSectionChange("stations")}
           />
           <MenuItem
             icon={
               <Image src="/icons/users.svg" alt="icon" width={20} height={20} />
             }
-            label="תחנות"
-            active={activeSection === "stations"}
-            onClick={() => onSectionChange("stations")}
+            label="נהגים"
+            active={activeSection === "drivers"}
+            onClick={() => onSectionChange("drivers")}
           />
           <MenuItem
             icon={
@@ -126,9 +126,9 @@ const SettingsMenu = ({
                 height={20}
               />
             }
-            label="נהגים"
-            active={activeSection === "drivers"}
-            onClick={() => onSectionChange("drivers")}
+            label="תחנה חדשה"
+            active={activeSection === "newStation"}
+            onClick={() => onSectionChange("newStation")}
           />
         </div>
       </div>

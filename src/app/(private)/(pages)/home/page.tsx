@@ -10,27 +10,34 @@ import { Action, Column } from "@/lib/types";
 interface Data {
   id?: number;
   company_id: number;
-  status: string;
+  status: number;
   total_trips: number;
   total_price: number;
 }
 
-// const STATUS_MAP: Record<number, { label: string; color: string }> = {
-//   1: { label: "ממתין", color: "bg-blue-100 text-blue-600" },
-//   2: { label: "תפוס", color: "bg-red-100 text-red-600" },
-//   3: { label: "הסתיים", color: "bg-blue-100 text-blue-600" },
-//   4: { label: "מבוטל", color: "bg-orange-100 text-orange-600" },
-// };
+const STATUS_MAP: Record<number, { label: string; color: string }> = {
+  1: { label: "ממתין", color: "bg-blue-100 text-blue-600" },
+  2: { label: "תפוס", color: "bg-red-100 text-red-600" },
+  3: { label: "הסתיים", color: "bg-blue-100 text-blue-600" },
+  4: { label: "מבוטל", color: "bg-orange-100 text-orange-600" },
+};
+
+const StatusBadge = ({ status }: { status: number }) => {
+  const { label, color } = STATUS_MAP[status] || {
+    label: "לא ידוע",
+    color: "bg-gray-100 text-gray-600",
+  };
+  return (
+    <span className={`px-3 py-1 rounded-md text-sm font-medium ${color}`}>
+      {label}
+    </span>
+  );
+};
 
 export default function Home() {
-  const [tripSummary, setTripSummary] = React.useState<
-    {
-      company_id: number;
-      status: string;
-      total_trips: number;
-      total_price: number;
-    }[]
-  >([]);
+  const [tripSummary, setTripSummary] = React.useState<Data[]>([]);
+  const [selectedStatus, setSelectedStatus] = React.useState<number | null>(null);
+  const [filteredTrips, setFilteredTrips] = React.useState<Data[]>([]);
 
   React.useEffect(() => {
     const fetchTripSummary = async () => {
@@ -46,6 +53,7 @@ export default function Home() {
           },
         });
         setTripSummary(data);
+        setFilteredTrips(data);
       } catch (error) {
         console.error("Error fetching trip summary:", error);
       }
@@ -54,9 +62,16 @@ export default function Home() {
     fetchTripSummary();
   }, []);
 
-  const getStatusCount = (status: string) => {
-    const statusData = tripSummary.find((item) => item.status === status);
-    return statusData?.total_trips || 0;
+  React.useEffect(() => {
+    if (selectedStatus) {
+      setFilteredTrips(tripSummary.filter(trip => trip.status === selectedStatus));
+    } else {
+      setFilteredTrips(tripSummary);
+    }
+  }, [selectedStatus, tripSummary]);
+
+  const getStatusCount = (status: number) => {
+    return tripSummary.filter(item => item.status === status).length;
   };
 
   const getTotalPrice = () => {
@@ -64,23 +79,13 @@ export default function Home() {
   };
 
   const columns: Column<Data>[] = [
-    { key: "company_id", header: "" },
-    { key: "total_trips", header: "" },
-    { key: "total_price", header: "" },
+    { key: "company_id", header: "מזהה חברה" },
+    { key: "total_trips", header: "מספר נסיעות" },
+    { key: "total_price", header: "מחיר כולל" },
     {
       key: "status",
-      header: "",
-      render: (value: string | number | undefined) => (
-        <div
-          className={`${
-            value === "לא פעיל"
-              ? "bg-[#FFF5E7] text-[#FF9500]"
-              : "bg-[#F0FFF1] text-[#2EBD32]"
-          } w-20 h-8 flex justify-center items-center rounded-lg`}
-        >
-          {value}
-        </div>
-      ),
+      header: "סטטוס",
+      render: (value: number | undefined) => value ? <StatusBadge status={value} /> : null,
     },
   ];
 
@@ -105,6 +110,10 @@ export default function Home() {
     },
   ];
 
+  const handleStatusBoxClick = (status: number) => {
+    setSelectedStatus(selectedStatus === status ? null : status);
+  };
+
   return (
     <>
       <div className="mr-80 flex flex-col gap-12">
@@ -118,7 +127,10 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <div className="relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 bg-primary">
+              <div 
+                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 1 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
+                onClick={() => handleStatusBoxClick(1)}
+              >
                 <button className="absolute top-3 left-4">
                   <Image
                     src="/icons/arrow-down.svg"
@@ -128,31 +140,15 @@ export default function Home() {
                   />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">
-                    {getStatusCount("לא פעיל")}
-                  </span>
-                  <span className="text-xl font-light">נסיעות פעילות</span>
-                </div>
-              </div>
-
-              <div className="relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 bg-white border-r-4 border-r-primary">
-                <button className="absolute top-3 left-4">
-                  <Image
-                    src="/icons/arrow-down.svg"
-                    alt="arrow down"
-                    width={20}
-                    height={20}
-                  />
-                </button>
-                <div className="flex flex-col">
-                  <span className="text-6xl font-bold">
-                    {getStatusCount("לא פעיל")}
-                  </span>
+                  <span className="text-6xl font-bold">{getStatusCount(1)}</span>
                   <span className="text-xl font-light">נסיעות ממתינות</span>
                 </div>
               </div>
 
-              <div className="relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 bg-white border-r-4 border-r-primary">
+              <div 
+                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 2 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
+                onClick={() => handleStatusBoxClick(2)}
+              >
                 <button className="absolute top-3 left-4">
                   <Image
                     src="/icons/arrow-down.svg"
@@ -162,9 +158,25 @@ export default function Home() {
                   />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">
-                    {getStatusCount("לא פעיל")}
-                  </span>
+                  <span className="text-6xl font-bold">{getStatusCount(2)}</span>
+                  <span className="text-xl font-light">נסיעות פעילות</span>
+                </div>
+              </div>
+
+              <div 
+                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 3 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
+                onClick={() => handleStatusBoxClick(3)}
+              >
+                <button className="absolute top-3 left-4">
+                  <Image
+                    src="/icons/arrow-down.svg"
+                    alt="arrow down"
+                    width={20}
+                    height={20}
+                  />
+                </button>
+                <div className="flex flex-col">
+                  <span className="text-6xl font-bold">{getStatusCount(3)}</span>
                   <span className="text-xl font-light">נסיעות שהסתיימו</span>
                 </div>
               </div>
@@ -177,14 +189,13 @@ export default function Home() {
 
           <section className="flex flex-col gap-6 mx-20 mb-20">
             <div className="flex justify-start items-center gap-3 text-3xl">
-              <h2 className="text-foreground font-medium">נסיעות פעילות</h2>
-              <span className="text-accent">({tripSummary.length})</span>
+              <h2 className="text-foreground font-medium">פירוט נסיעות</h2>
+              <span className="text-accent">({filteredTrips.length})</span>
             </div>
 
             <div className="">
-              {/* <BidTable /> */}
               <DataTable
-                data={tripSummary}
+                data={filteredTrips}
                 columns={columns}
                 showCheckbox={true}
                 actions={actions}
@@ -198,45 +209,3 @@ export default function Home() {
     </>
   );
 }
-
-// const StatusBadge = ({ status }: { status: number }) => {
-//   const { label, color } = STATUS_MAP[status] || {
-//     label: "לא ידוע",
-//     color: "bg-gray-100 text-gray-600",
-//   };
-//   return (
-//     <span className={`px-3 py-1 rounded-md text-sm font-medium ${color}`}>
-//       {label}
-//     </span>
-//   );
-// };
-
-// const bids = [
-//   { id: 1, status: 3 },
-//   { id: 2, status: 4 },
-//   { id: 3, status: 2 },
-//   { id: 4, status: 1 },
-// ];
-
-// // const BidTable = () => {
-// //   return (
-// //     <table className="min-w-full border rounded-md" dir="rtl">
-// //       <thead>
-// //         <tr className="bg-gray-100 text-right">
-// //           <th className="px-4 py-2">#</th>
-// //           <th className="px-4 py-2">סטטוס</th>
-// //         </tr>
-// //       </thead>
-// //       <tbody>
-// //         {bids.map((bid) => (
-// //           <tr key={bid.id} className="border-b">
-// //             <td className="px-4 py-2">{bid.id}</td>
-// //             <td className="px-4 py-2">
-// //               <StatusBadge status={bid.status} />
-// //             </td>
-// //           </tr>
-// //         ))}
-// //       </tbody>
-// //     </table>
-// //   );
-// // };
