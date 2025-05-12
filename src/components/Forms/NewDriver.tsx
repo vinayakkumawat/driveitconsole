@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -16,143 +16,152 @@ import { getCurrentUser } from '@/lib/auth';
 import { Input } from '../ui/input';
 
 const newDriverFormSchema = z.object({
-    firstName: z.string().min(2).max(50),
-    lastName: z.string().min(2).max(50),
-    phone: z.string().min(2).max(50),
-    additionalPhone: z.string().optional(),
-    address: z.string().optional(),
-    city: z.string().optional(),
-    emailAddress: z.string().email().optional(),
-    serialNumber: z.string().min(2).max(50),
-    belongsToTheChannel: z.string().optional(),
-
-    vehicleType: z.string().optional(),
-    numberOfPlaces: z.number().optional(),
-    category: z.string().optional(),
-    vehicleCondition: z.string().optional(),
-
-    fixedCharge: z.number().optional(),
-    variableCharge: z.number().optional(),
+  firstName: z.string().min(2).max(50),
+  lastName: z.string().min(2).max(50),
+  phone: z.string().min(2).max(50),
+  additionalPhone: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  emailAddress: z.string().email().optional(),
+  serialNumber: z.string().min(2).max(50),
+  belongsToTheChannel: z.string().optional(),
+  vehicleType: z.string().optional(),
+  numberOfPlaces: z.number().optional(),
+  category: z.string().optional(),
+  vehicleCondition: z.string().optional(),
+  fixedCharge: z.number().optional(),
+  variableCharge: z.number().optional(),
 });
 
 type NewDriverFormValues = z.infer<typeof newDriverFormSchema>;
 
 interface CompanyDetails {
-    id: number;
-    defaultFixedCharge: string;
-    defaultVariableCharge: string;
+  id: number;
+  defaultFixedCharge: string;
+  defaultVariableCharge: string;
 }
 
 interface UserDetails {
-    id: number;
+  id: number;
 }
 
 interface NewDriverProps {
-    onCancel: () => void;
+  onCancel: () => void;
 }
 
 const NewDriver = ({ onCancel }: NewDriverProps) => {
-    const currentUser = getCurrentUser();
+  const currentUser = getCurrentUser();
 
-    const [companyDetails] = useState<CompanyDetails>({
-        id: 1,
-        defaultFixedCharge: "100",
-        defaultVariableCharge: "1.5"
-    });
-    const [userDetails] = useState<UserDetails>({
-        id: currentUser.id
-    });
-    const [selectedCheckbox, setSelectedCheckbox] = useState<string | null>(null);
-    const handleCheckboxChange = (option: string) => {
-        setSelectedCheckbox(prev => (prev === option ? null : option));
-    };
+  const [companyDetails] = useState<CompanyDetails>({
+    id: 1,
+    defaultFixedCharge: "100",
+    defaultVariableCharge: "1.5",
+  });
 
-    const form = useForm<NewDriverFormValues>({
-        resolver: zodResolver(newDriverFormSchema),
-        defaultValues: {
-            firstName: '',
-            lastName: '',
-            phone: '',
-            additionalPhone: '',
-            address: '',
-            city: '',
-            emailAddress: '',
-            serialNumber: generateSerialNumber(companyDetails.id, userDetails.id),
-            belongsToTheChannel: '',
+  const [userDetails] = useState<UserDetails>({ id: currentUser.id });
+  const [selectedCheckbox, setSelectedCheckbox] = useState<string | null>(null);
 
-            vehicleType: '',
-            numberOfPlaces: 0,
-            category: '',
-            vehicleCondition: '',
+  const handleCheckboxChange = (option: string) => {
+    setSelectedCheckbox(prev => (prev === option ? null : option));
+  };
 
-            fixedCharge: 0,
-            variableCharge: 0,
-        },
-    });
+  const form = useForm<NewDriverFormValues>({
+    resolver: zodResolver(newDriverFormSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      phone: '',
+      additionalPhone: '',
+      address: '',
+      city: '',
+      emailAddress: '',
+      serialNumber: generateSerialNumber(companyDetails.id, userDetails.id),
+      belongsToTheChannel: '',
+      vehicleType: '',
+      numberOfPlaces: 0,
+      category: '',
+      vehicleCondition: '',
+      fixedCharge: 0,
+      variableCharge: 0,
+    },
+  });
 
-    async function onSubmit(values: NewDriverFormValues) {
-        try {
-            const token = localStorage.getItem('auth-token');
-            if (!token) {
-                console.error("❌ טוקן אימות לא נמצא");
-                return;
-            }
-
-            const formattedData = {
-                _company_id: companyDetails.id,
-                _first_name: values.firstName,
-                _last_name: values.lastName || '',
-                _address: values.address || '',
-                _city: values.city || '',
-                _serial_number: values.serialNumber,
-                _channel_id: values.belongsToTheChannel ? parseInt(values.belongsToTheChannel) : null,
-                _vehicle_type: values.vehicleType || '',
-                _number_of_seats: values.numberOfPlaces || 0,
-                _category: values.category || '',
-                _vehicle_status: values.vehicleCondition || '',
-                _email: values.emailAddress || '',
-                _phone: formatPhoneNumber(values.phone),
-                _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-                _fixed_charge: selectedCheckbox === 'default'
-                    ? parseFloat(companyDetails.defaultFixedCharge)
-                    : parseFloat(values.fixedCharge?.toString() || '0'),
-                _percentage_charge: selectedCheckbox === 'default'
-                    ? parseFloat(companyDetails.defaultVariableCharge)
-                    : parseFloat(values.variableCharge?.toString() || '0'),
-                _user_id: currentUser.id,
-            };
-
-            const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ p: formattedData }),
-            });
-
-            let responseBody;
-            try {
-                responseBody = await response.json();
-            } catch {
-                responseBody = await response.text();
-            }
-
-            console.log("📥 סטטוס התגובה:", response.status);
-            console.log("📥 תוכן התגובה מהשרת:", responseBody);
-
-            if (!response.ok) {
-                console.error("❌ שגיאה ביצירת הנהג:", responseBody);
-                return;
-            }
-
-            console.log("✅ הנהג נוצר בהצלחה");
-            onCancel();
-
-        } catch (error) {
-            console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
+  useEffect(() => {
+    async function fetchAndStoreToken() {
+      try {
+        const response = await fetch("https://test.drive-it.co.il/api/token?password=mySecretPassword");
+        const data = await response.json();
+        if (data.token && data.token.split('.').length === 3) {
+          localStorage.setItem('auth-token', data.token);
+          console.log("✅ טוקן נשמר בהצלחה");
+        } else {
+          console.error("❌ טוקן לא תקין או חסר");
         }
+      } catch (error) {
+        console.error("❌ שגיאה בשליפת הטוקן:", error);
+      }
     }
+    fetchAndStoreToken();
+  }, []);
+
+  async function onSubmit(values: NewDriverFormValues) {
+    try {
+      const token = localStorage.getItem('auth-token');
+      const isJwt = token && token.split('.').length === 3;
+
+      const formattedData = {
+        _company_id: companyDetails.id,
+        _first_name: values.firstName,
+        _last_name: values.lastName || '',
+        _address: values.address || '',
+        _city: values.city || '',
+        _serial_number: values.serialNumber,
+        _channel_id: values.belongsToTheChannel ? parseInt(values.belongsToTheChannel) : null,
+        _vehicle_type: values.vehicleType || '',
+        _number_of_seats: values.numberOfPlaces || 0,
+        _category: values.category || '',
+        _vehicle_status: values.vehicleCondition || '',
+        _email: values.emailAddress || '',
+        _phone: formatPhoneNumber(values.phone),
+        _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
+        _fixed_charge: selectedCheckbox === 'default'
+          ? parseFloat(companyDetails.defaultFixedCharge)
+          : parseFloat(values.fixedCharge?.toString() || '0'),
+        _percentage_charge: selectedCheckbox === 'default'
+          ? parseFloat(companyDetails.defaultVariableCharge)
+          : parseFloat(values.variableCharge?.toString() || '0'),
+        _user_id: currentUser.id,
+      };
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(isJwt ? { 'Authorization': `Bearer ${token}` } : {}),
+      };
+
+      const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ p: formattedData }),
+      });
+
+      const responseBody = await response.text();
+
+      console.log("📥 סטטוס התגובה:", response.status);
+      console.log("📥 תוכן התגובה מהשרת:", responseBody);
+
+      if (!response.ok) {
+        console.error("❌ שגיאה ביצירת הנהג:", responseBody);
+        return;
+      }
+
+      console.log("✅ הנהג נוצר בהצלחה");
+      onCancel();
+    } catch (error) {
+      console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
+    }
+  }
+
+
 
     return (
   
