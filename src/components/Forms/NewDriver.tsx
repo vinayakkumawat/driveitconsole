@@ -156,6 +156,61 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
   }
 }
 
+    const formattedData = {
+      company_id: companyDetails.id,
+      first_name: values.firstName,
+      last_name: values.lastName || '',
+      address: values.address || '',
+      city: values.city || '',
+      serial_number: values.serialNumber,
+      channel: values.belongsToTheChannel || '',
+      vehicle_type: values.vehicleType || '',
+      number_of_seats: values.numberOfPlaces || 0,
+      category: values.category || '',
+      vehicle_status: values.vehicleCondition || '',
+      email: values.emailAddress || '',
+      phone: formatPhoneNumber(values.phone),
+      additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
+      fixed_charge: selectedCheckbox === 'default'
+        ? parseFloat(companyDetails.defaultFixedCharge)
+        : parseFloat(values.fixedCharge?.toString() || '0'),
+      variable_charge: selectedCheckbox === 'default'
+        ? parseFloat(companyDetails.defaultVariableCharge)
+        : parseFloat(values.variableCharge?.toString() || '0'),
+    };
+
+    const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(formattedData),
+    });
+
+    let responseBody;
+    try {
+      responseBody = await response.json();
+    } catch (e) {
+      responseBody = await response.text();
+    }
+
+    console.log("📥 סטטוס התגובה:", response.status);
+    console.log("📥 תוכן התגובה מהשרת:", responseBody);
+
+    if (!response.ok) {
+      console.error("❌ שגיאה ביצירת הנהג:", responseBody);
+      return;
+    }
+
+    console.log("✅ הנהג נוצר בהצלחה");
+    onCancel();
+
+  } catch (error) {
+    console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
+  }
+}
+
             const formattedData = {
                 company_id: companyDetails.id,
                 first_name: values.firstName,
