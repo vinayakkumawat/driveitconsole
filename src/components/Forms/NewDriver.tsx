@@ -133,7 +133,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
             let responseBody;
             try {
                 responseBody = await response.json();
-            } catch (e) {
+            } catch {
                 responseBody = await response.text();
             }
 
