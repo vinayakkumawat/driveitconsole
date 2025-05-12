@@ -128,7 +128,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify(formattedData),
+                body: JSON.stringify({ p: formattedData }),
             });
 
             let responseBody;
