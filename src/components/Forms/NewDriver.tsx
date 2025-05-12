@@ -11,7 +11,7 @@ import FormDataInputSingleElement from '@/components/ui/formDataInputSingleEleme
 import { Label } from '../ui/label';
 import Image from 'next/image';
 import { generateSerialNumber, formatPhoneNumber } from '@/lib/utils';
-import { API_BASE_URL, API_TOKEN } from '@/lib/api';
+import { API_BASE_URL } from '@/lib/api';
 import { getCurrentUser } from '@/lib/auth';
 import { Input } from '../ui/input';
 
@@ -53,9 +53,6 @@ interface NewDriverProps {
 
 const NewDriver = ({ onCancel }: NewDriverProps) => {
     const currentUser = getCurrentUser();
-    // const userCompany = getCurrentUserCompany();
-
-    // console.log(userCompany)
 
     const [companyDetails] = useState<CompanyDetails>({
         id: 1,
@@ -88,128 +85,18 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
             category: '',
             vehicleCondition: '',
 
-            fixedCharge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : 0,
-            variableCharge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : 0,
+            fixedCharge: 0,
+            variableCharge: 0,
         },
     });
 
     async function onSubmit(values: NewDriverFormValues) {
-  try {
-    const token = localStorage.getItem('auth-token');
-    if (!token) {
-      console.error("❌ טוקן אימות לא נמצא");
-      return;
-    }
-
-    const formattedData = {
-      company_id: companyDetails.id,
-      first_name: values.firstName,
-      last_name: values.lastName || '',
-      address: values.address || '',
-      city: values.city || '',
-      serial_number: values.serialNumber,
-      channel: values.belongsToTheChannel || '',
-      vehicle_type: values.vehicleType || '',
-      number_of_seats: values.numberOfPlaces || 0,
-      category: values.category || '',
-      vehicle_status: values.vehicleCondition || '',
-      email: values.emailAddress || '',
-      phone: formatPhoneNumber(values.phone),
-      additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-      fixed_charge: selectedCheckbox === 'default'
-        ? parseFloat(companyDetails.defaultFixedCharge)
-        : parseFloat(values.fixedCharge?.toString() || '0'),
-      variable_charge: selectedCheckbox === 'default'
-        ? parseFloat(companyDetails.defaultVariableCharge)
-        : parseFloat(values.variableCharge?.toString() || '0'),
-    };
-
-    const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(formattedData),
-    });
-
-    let responseBody;
-    try {
-      responseBody = await response.json();
-    } catch (e) {
-      responseBody = await response.text();
-    }
-
-    console.log("📥 סטטוס התגובה:", response.status);
-    console.log("📥 תוכן התגובה מהשרת:", responseBody);
-
-    if (!response.ok) {
-      console.error("❌ שגיאה ביצירת הנהג:", responseBody);
-      return;
-    }
-
-    console.log("✅ הנהג נוצר בהצלחה");
-    onCancel();
-
-  } catch (error) {
-    console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
-  }
-}
-
-    const formattedData = {
-      company_id: companyDetails.id,
-      first_name: values.firstName,
-      last_name: values.lastName || '',
-      address: values.address || '',
-      city: values.city || '',
-      serial_number: values.serialNumber,
-      channel: values.belongsToTheChannel || '',
-      vehicle_type: values.vehicleType || '',
-      number_of_seats: values.numberOfPlaces || 0,
-      category: values.category || '',
-      vehicle_status: values.vehicleCondition || '',
-      email: values.emailAddress || '',
-      phone: formatPhoneNumber(values.phone),
-      additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-      fixed_charge: selectedCheckbox === 'default'
-        ? parseFloat(companyDetails.defaultFixedCharge)
-        : parseFloat(values.fixedCharge?.toString() || '0'),
-      variable_charge: selectedCheckbox === 'default'
-        ? parseFloat(companyDetails.defaultVariableCharge)
-        : parseFloat(values.variableCharge?.toString() || '0'),
-    };
-
-    const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(formattedData),
-    });
-
-    let responseBody;
-    try {
-      responseBody = await response.json();
-    } catch (e) {
-      responseBody = await response.text();
-    }
-
-    console.log("📥 סטטוס התגובה:", response.status);
-    console.log("📥 תוכן התגובה מהשרת:", responseBody);
-
-    if (!response.ok) {
-      console.error("❌ שגיאה ביצירת הנהג:", responseBody);
-      return;
-    }
-
-    console.log("✅ הנהג נוצר בהצלחה");
-    onCancel();
-
-  } catch (error) {
-    console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
-  }
-}
+        try {
+            const token = localStorage.getItem('auth-token');
+            if (!token) {
+                console.error("❌ טוקן אימות לא נמצא");
+                return;
+            }
 
             const formattedData = {
                 company_id: companyDetails.id,
@@ -226,29 +113,47 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
                 email: values.emailAddress || '',
                 phone: formatPhoneNumber(values.phone),
                 additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-                fixed_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : parseFloat(values.fixedCharge?.toString() || '0'),
-                variable_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultVariableCharge) : parseFloat(values.variableCharge?.toString() || '0'),
+                fixed_charge: selectedCheckbox === 'default'
+                    ? parseFloat(companyDetails.defaultFixedCharge)
+                    : parseFloat(values.fixedCharge?.toString() || '0'),
+                variable_charge: selectedCheckbox === 'default'
+                    ? parseFloat(companyDetails.defaultVariableCharge)
+                    : parseFloat(values.variableCharge?.toString() || '0'),
             };
 
             const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(formattedData),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to create driver');
+            let responseBody;
+            try {
+                responseBody = await response.json();
+            } catch (e) {
+                responseBody = await response.text();
             }
 
+            console.log("📥 סטטוס התגובה:", response.status);
+            console.log("📥 תוכן התגובה מהשרת:", responseBody);
+
+            if (!response.ok) {
+                console.error("❌ שגיאה ביצירת הנהג:", responseBody);
+                return;
+            }
+
+            console.log("✅ הנהג נוצר בהצלחה");
             onCancel();
 
         } catch (error) {
-            console.error('Error creating driver:', error);
+            console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
         }
     }
+
+    // שאר הקוד לא השתנה (טופס ו־UI)
 
     return (
         <Form {...form}>
