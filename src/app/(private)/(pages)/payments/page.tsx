@@ -1,213 +1,213 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { Column, Action } from "@/lib/types";
 import { DataTable } from "@/components/theme/DataTable";
-import { fetchApi } from "@/lib/api";
-import { getCurrentCompanyId } from "@/lib/auth";
+// import { fetchApi } from "@/lib/api";
+// import { getCurrentCompanyId } from "@/lib/auth";
 // import PaymentActions from "@/components/Forms/PaymentActions";
 
-interface PaymentData {
+interface PaymentRow {
   id: number;
-  company_id: number;
-  amount: number;
-  payment_date: string;
-  payment_method: string;
-  status: "מאושר" | "בטיפול" | "נדחה";
+  serial_number: string;
+  customer_name: string;
+  phone: string;
+  additional_phone: string;
+  city: string;
+  status: "יתרה" | "חוב";
+  balance_amount: string;
+  debt_amount: string;
 }
 
-// const data: DriverData[] = [
-//   {
-//     id: "1",
-//     driverName: "אבי כהן",
-//     residentialArea: "תל אביב",
-//     phone: "052.123.4567",
-//     additionalPhone: "054.987.6543",
-//     associatedWithAChannel: "987654321",
-//     status: "פעיל",
-//   },
-//   {
-//     id: "2",
-//     driverName: "יוסי לוי",
-//     residentialArea: "חיפה",
-//     phone: "053.321.6789",
-//     additionalPhone: "056.654.3210",
-//     associatedWithAChannel: "876543210",
-//     status: "לא פעיל",
-//   },
-//   {
-//     id: "3",
-//     driverName: "דני פרץ",
-//     residentialArea: "באר שבע",
-//     phone: "050.111.2222",
-//     additionalPhone: "058.333.4444",
-//     associatedWithAChannel: "765432109",
-//     status: "פעיל",
-//   },
-//   {
-//     id: "4",
-//     driverName: "רוני ישראלי",
-//     residentialArea: "נתניה",
-//     phone: "051.222.3333",
-//     additionalPhone: "059.444.5555",
-//     associatedWithAChannel: "654321098",
-//     status: "לא פעיל",
-//   },
-//   {
-//     id: "5",
-//     driverName: "משה דנינו",
-//     residentialArea: "אשדוד",
-//     phone: "055.333.4444",
-//     additionalPhone: "057.555.6666",
-//     associatedWithAChannel: "543210987",
-//     status: "פעיל",
-//   },
-//   {
-//     id: "6",
-//     driverName: "יונתן רז",
-//     residentialArea: "רמת גן",
-//     phone: "054.444.5555",
-//     additionalPhone: "052.666.7777",
-//     associatedWithAChannel: "432109876",
-//     status: "לא פעיל",
-//   },
-//   {
-//     id: "7",
-//     driverName: "אורן שמש",
-//     residentialArea: "פתח תקווה",
-//     phone: "053.555.6666",
-//     additionalPhone: "051.777.8888",
-//     associatedWithAChannel: "321098765",
-//     status: "פעיל",
-//   },
-//   {
-//     id: "8",
-//     driverName: "גבי שלמה",
-//     residentialArea: "הרצליה",
-//     phone: "052.666.7777",
-//     additionalPhone: "050.888.9999",
-//     associatedWithAChannel: "210987654",
-//     status: "לא פעיל",
-//   },
-//   {
-//     id: "9",
-//     driverName: "תומר נקש",
-//     residentialArea: "כפר סבא",
-//     phone: "051.777.8888",
-//     additionalPhone: "053.999.0000",
-//     associatedWithAChannel: "109876543",
-//     status: "פעיל",
-//   },
-//   {
-//     id: "10",
-//     driverName: "אלון בן עמי",
-//     residentialArea: "רעננה",
-//     phone: "050.888.9999",
-//     additionalPhone: "054.000.1111",
-//     associatedWithAChannel: "098765432",
-//     status: "לא פעיל",
-//   },
-// ];
+const dummyData: PaymentRow[] = [
+  {
+    id: 1,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "לקוחות",
+    status: "חוב",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 2,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "נהגים",
+    status: "יתרה",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 3,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "לקוחות",
+    status: "חוב",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 4,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "לקוחות",
+    status: "יתרה",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 5,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "לקוחות",
+    status: "יתרה",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 6,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "נהגים",
+    status: "חוב",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 7,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "נהגים",
+    status: "חוב",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 8,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "נהגים",
+    status: "יתרה",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+  {
+    id: 9,
+    serial_number: "1123658",
+    customer_name: "משה אבוטבול",
+    phone: "050.7765842",
+    additional_phone: "050.7765842",
+    city: "נהגים",
+    status: "חוב",
+    balance_amount: "₪ 1,890",
+    debt_amount: "₪ 1,890",
+  },
+];
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<PaymentData[]>([]);
-  const [filteredData, setFilteredData] = useState<PaymentData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // API code (keep for future use, as in DriversPage)
+  // const [payments, setPayments] = useState<PaymentRow[]>([]);
+  // const [filteredData, setFilteredData] = useState<PaymentRow[]>([]);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
+  // useEffect(() => {
+  //   async function loadPayments() {
+  //     try {
+  //       const companyId = getCurrentCompanyId();
+  //       if (!companyId) throw new Error("Company ID not found.");
+  //       const data = await fetchApi("/payments_view", { params: { company_id: `eq.${companyId}` } });
+  //       setPayments(data);
+  //       setFilteredData(data);
+  //     } catch (err) {
+  //       setError("Error");
+  //       console.error("Error fetching payments:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  //   loadPayments();
+  // }, []);
 
-  useEffect(() => {
-    async function loadPayments() {
-      try {
-        const companyId = getCurrentCompanyId();
-        if (!companyId) {
-          throw new Error("Company ID not found.");
-        }
-
-        const data = await fetchApi("/payments_view", {
-          params: {
-            company_id: `eq.${companyId}`,
-          },
-        });
-        setPayments(data);
-        setFilteredData(data);
-      } catch (err) {
-        setError("Error");
-        console.error("Error fetching payments:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadPayments();
-  }, []);
+  const [filteredData, setFilteredData] = useState<PaymentRow[]>(dummyData);
 
   const handleApplyFilter = useCallback((filters: Record<string, string | boolean>) => {
-    let filtered = payments;
+    let filtered = dummyData;
     Object.keys(filters).forEach((key) => {
       if (filters[key]) {
-        filtered = filtered.filter((driver) => {
+        filtered = filtered.filter((row) => {
           const filterValue = filters[key];
           if (typeof filterValue === "boolean") return true;
-          return (driver[key as keyof PaymentData] as string)
+          return (row[key as keyof PaymentRow] as string)
             .toLowerCase()
             .includes((filterValue as string).toLowerCase());
         });
       }
     });
     setFilteredData(filtered);
-  }, [payments]);
+  }, []);
 
   const handleSearch = useCallback((query: string) => {
     if (query.trim() === "") {
-      setFilteredData(payments);
+      setFilteredData(dummyData);
     } else {
       const lowerCaseQuery = query.toLowerCase();
-      const filtered = payments.filter(
-        (data) =>
-          data.amount.toString().includes(query) ||
-          data.payment_date.includes(query) ||
-          data.payment_method.toLowerCase().includes(lowerCaseQuery)
+      const filtered = dummyData.filter(
+        (row) =>
+          row.customer_name.toLowerCase().includes(lowerCaseQuery) ||
+          row.phone.includes(query) ||
+          row.serial_number.includes(query)
       );
       setFilteredData(filtered);
     }
-  }, [payments]);
+  }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
-  const columns: Column<PaymentData>[] = [
-    { key: "amount", header: "סכום" },
-    { key: "payment_date", header: "תאריך התשלום" },
-    { key: "payment_method", header: "שיטת התשלום" },
+  const columns: Column<PaymentRow>[] = [
+    { key: "serial_number", header: "מספר סידורי" },
+    { key: "customer_name", header: "שם לקוח" },
+    { key: "phone", header: "טלפון" },
+    { key: "additional_phone", header: "טלפון נוסף" },
+    { key: "city", header: "עיר" },
     {
       key: "status",
       header: "סטטוס",
-      render: (value: string | number) => (
-        <div
-          className={`${
-            value === "נדחה"
-              ? "bg-[#FFF5E7] text-[#FF9500]"
-              : value === "בטיפול"
-              ? "bg-[#F0FFF1] text-[#2EBD32]"
-              : "bg-[#F0FFF1] text-[#2EBD32]"
-          } w-20 h-8 flex justify-center items-center rounded-lg`}
-        >
-          {value}
-        </div>
-      ),
+      render: (value: string | number) => {
+        const statusValue = String(value);
+        return (
+          <span style={{ color: statusValue === "חוב" ? "#FF3B30" : "#2EBD32", fontWeight: 500 }}>{statusValue}</span>
+        );
+      },
     },
+    { key: "balance_amount", header: "סכום יתרה" },
+    { key: "debt_amount", header: "סכום חוב" },
   ];
 
-  const actions: Action<PaymentData>[] = [
-    {
-      icon: "/icons/open-eye.svg",
-      alt: "see",
-      form: <div>Component is hidden.</div>,
-    },
+  const actions: Action<PaymentRow>[] = [
     {
       icon: "/icons/edit-icon.svg",
       alt: "edit",
       onClick: (row) => console.log("Edit", row),
+    },
+    {
+      icon: "/icons/open-eye.svg",
+      alt: "see",
+      form: <div>Component is hidden.</div>, // Replace with your actual view component
     },
   ];
 
@@ -216,21 +216,23 @@ export default function PaymentsPage() {
     label: string;
     type: "text" | "checkbox";
   }[] = [
-    { key: "amount", label: "סכום", type: "text" },
-    { key: "payment_date", label: "תאריך התשלום", type: "text" },
-    { key: "payment_method", label: "שיטת התשלום", type: "text" },
+    { key: "serial_number", label: "מספר סידורי", type: "text" },
+    { key: "customer_name", label: "שם לקוח", type: "text" },
+    { key: "phone", label: "טלפון", type: "text" },
+    { key: "city", label: "עיר", type: "text" },
+    { key: "status", label: "סטטוס", type: "text" },
   ];
 
   return (
-    <div className="mr-80 flex flex-col gap-12">
+    <div className="mr-80 flex flex-col gap-12" dir="rtl">
       <section className="flex flex-col gap-6 mx-20 mt-20">
-      <DataTable
+        <DataTable
           data={filteredData}
           columns={columns}
           actions={actions}
-          showCheckbox={true}
-          title="כל התשלומים"
-          subtitle="(389)"
+          showCheckbox={false}
+          title="יתרות / חובות"
+          subtitle={`(${filteredData.length})`}
           showSearch={true}
           showFilter={true}
           onSearch={handleSearch}

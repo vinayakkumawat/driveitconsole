@@ -100,23 +100,34 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
                 throw new Error('Authentication token not found');
             }
 
+            // Prepare the payload as per API documentation
             const formattedData = {
-                company_id: companyDetails.id,
-                first_name: values.firstName,
-                last_name: values.lastName || '',
-                address: values.address || '',
-                city: values.city || '',
-                serial_number: values.serialNumber,
-                channel: values.belongsToTheChannel || '',
-                vehicle_type: values.vehicleType || '',
-                number_of_seats: values.numberOfPlaces || 0,
-                category: values.category || '',
-                vehicle_status: values.vehicleCondition || '',
-                email: values.emailAddress || '',
-                phone: formatPhoneNumber(values.phone),
-                additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-                fixed_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultFixedCharge) : parseFloat(values.fixedCharge?.toString() || '0'),
-                variable_charge: selectedCheckbox === 'default' ? parseFloat(companyDetails.defaultVariableCharge) : parseFloat(values.variableCharge?.toString() || '0'),
+                p: {
+                    _company_id: companyDetails.id,
+                    _first_name: values.firstName,
+                    _last_name: values.lastName,
+                    _phone: formatPhoneNumber(values.phone),
+                    _user_id: userDetails.id,
+                    _status: "active",
+                    _address: values.address || "",
+                    _city: values.city || "",
+                    _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : "",
+                    _vehicle_type: values.vehicleType || "",
+                    _number_of_seats: values.numberOfPlaces || 0,
+                    _category: values.category || "",
+                    _vehicle_status: values.vehicleCondition || "",
+                    _comments: "Added via API",
+                    _fixed_charge_by: selectedCheckbox === "default" ? "Channel" : "Customized",
+                    _fixed_charge: selectedCheckbox === "default"
+                        ? parseFloat(companyDetails.defaultFixedCharge)
+                        : parseFloat(values.fixedCharge?.toString() || "0"),
+                    _percentage_charge: selectedCheckbox === "default"
+                        ? parseFloat(companyDetails.defaultVariableCharge)
+                        : parseFloat(values.variableCharge?.toString() || "0"),
+                    _channel_id: values.belongsToTheChannel && !isNaN(Number(values.belongsToTheChannel))
+                        ? parseInt(values.belongsToTheChannel)
+                        : undefined,
+                }
             };
 
             const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
