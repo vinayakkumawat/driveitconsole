@@ -85,8 +85,6 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
       variableCharge: 0,
     },
   });
-
-  useEffect(() => {
    async function fetchTokenAndSave(): Promise<string | null> {
     try {
         const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
@@ -104,7 +102,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
         return null;
     }
 }
-  }
+
 
   async function onSubmit(values: NewDriverFormValues) {
     try {
