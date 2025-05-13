@@ -15,23 +15,6 @@ import { API_BASE_URL } from '@/lib/api';
 import { getCurrentUser } from '@/lib/auth';
 import { Input } from '../ui/input';
 
-"use client";
-
-import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import FormDataInputSingleElement from '@/components/ui/formDataInputSingleElement';
-import { Label } from '../ui/label';
-import Image from 'next/image';
-import { generateSerialNumber, formatPhoneNumber } from '@/lib/utils';
-import { API_BASE_URL } from '@/lib/api';
-import { getCurrentUser } from '@/lib/auth';
-import { Input } from '../ui/input';
-
 const newDriverFormSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
