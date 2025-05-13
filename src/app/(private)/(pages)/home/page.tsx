@@ -5,20 +5,29 @@ import Image from "next/image";
 import { fetchApi } from "@/lib/api";
 import { getCurrentCompanyId } from "@/lib/auth";
 import { DataTable } from "@/components/theme/DataTable";
-import { Action, Column } from "@/lib/types";
+import { Column } from "@/lib/types";
 
-interface Data {
-  id?: number;
+interface TripSummary {
   company_id: number;
   status: number;
   total_trips: number;
   total_price: number;
 }
 
+interface TripDetail {
+  id?: string | number;
+  company_id: number;
+  route: string;
+  service_type: string;
+  service_date: string;
+  status: number;
+  actions?: undefined;
+}
+
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
   1: { label: "ממתין", color: "bg-blue-100 text-blue-600" },
-  2: { label: "תפוס", color: "bg-red-100 text-red-600" },
-  3: { label: "הסתיים", color: "bg-blue-100 text-blue-600" },
+  2: { label: "פעיל", color: "bg-yellow-200 text-yellow-700" },
+  3: { label: "הסתיים", color: "bg-green-100 text-green-600" },
   4: { label: "מבוטל", color: "bg-orange-100 text-orange-600" },
 };
 
@@ -35,80 +44,92 @@ const StatusBadge = ({ status }: { status: number }) => {
 };
 
 export default function Home() {
-  const [tripSummary, setTripSummary] = React.useState<Data[]>([]);
+  const [tripSummary, setTripSummary] = React.useState<TripSummary[]>([]);
+  const [tripDetails, setTripDetails] = React.useState<TripDetail[]>([]);
   const [selectedStatus, setSelectedStatus] = React.useState<number | null>(null);
-  const [filteredTrips, setFilteredTrips] = React.useState<Data[]>([]);
+  const [filteredTrips, setFilteredTrips] = React.useState<TripDetail[]>([]);
 
   React.useEffect(() => {
-    const fetchTripSummary = async () => {
+    const fetchData = async () => {
       try {
         const companyId = getCurrentCompanyId();
-        if (!companyId) {
-          throw new Error("Company ID not found.");
-        }
-
-        const data = await fetchApi("/daily_trip_summary", {
-          params: {
-            company_id: `eq.${companyId}`,
-          },
+        if (!companyId) throw new Error("Company ID not found.");
+        // Fetch summary
+        const summary = await fetchApi("/daily_trip_summary", {
+          params: { company_id: `eq.${companyId}` },
         });
-        setTripSummary(data);
-        setFilteredTrips(data);
+        setTripSummary(summary);
+        // Fetch details
+        let details = await fetchApi("/daily_trip_details", {
+          params: { company_id: `eq.${companyId}` },
+        });
+        // Add synthetic id if not present
+        details = details.map((item: TripDetail, idx: number) => ({ ...item, id: idx }));
+        setTripDetails(details);
+        setFilteredTrips(details);
       } catch (error) {
-        console.error("Error fetching trip summary:", error);
+        console.error("Error fetching data:", error);
       }
     };
-
-    fetchTripSummary();
+    fetchData();
   }, []);
 
   React.useEffect(() => {
     if (selectedStatus) {
-      setFilteredTrips(tripSummary.filter(trip => trip.status === selectedStatus));
+      setFilteredTrips(tripDetails.filter(trip => trip.status === selectedStatus));
     } else {
-      setFilteredTrips(tripSummary);
+      setFilteredTrips(tripDetails);
     }
-  }, [selectedStatus, tripSummary]);
+  }, [selectedStatus, tripDetails]);
 
   const getStatusCount = (status: number) => {
-    return tripSummary.filter(item => item.status === status).length;
+    const summary = tripSummary.find(item => item.status === status);
+    return summary ? summary.total_trips : 0;
   };
 
   const getTotalPrice = () => {
     return tripSummary.reduce((sum, item) => sum + (item.total_price || 0), 0);
   };
 
-  const columns: Column<Data>[] = [
-    { key: "company_id", header: "מזהה חברה" },
-    { key: "total_trips", header: "מספר נסיעות" },
-    { key: "total_price", header: "מחיר כולל" },
+  const columns: Column<TripDetail>[] = [
+    { key: "route", header: "מסלול" },
+    { key: "service_type", header: "סוג שירות" },
+    { key: "service_date", header: "תאריך שירות" },
     {
       key: "status",
       header: "סטטוס",
-      render: (value: number | undefined) => value ? <StatusBadge status={value} /> : null,
+      render: (value) => typeof value === 'number' ? <StatusBadge status={value} /> : null,
     },
   ];
-
-  const actions: Action<Data>[] = [
-    {
-      icon: "/icons/stop-circle.svg",
-      alt: "see",
-      text: "עצירה",
-      form: <div />,
-    },
-    {
-      icon: "/icons/edit-icon.svg",
-      alt: "edit",
-      text: "עריכה",
-      onClick: (row) => console.log("Edit", row),
-    },
-    {
-      icon: "/icons/delete-icon.svg",
-      alt: "report",
-      text: "מחיקה",
-      onClick: (row) => console.log("Report", row),
-    },
-  ];
+  const actionColumn: Column<TripDetail> = {
+    key: "actions",
+    header: "",
+    render: (_, row) => (
+      <div className="flex gap-2">
+        <button
+          className="bg-[#F8F5ED] border border-[#E6D7B8] text-[#3E404C] rounded-md px-4 py-2 flex items-center gap-2 hover:drop-shadow-md transition-all duration-200"
+          onClick={() => console.log('Stop', row)}
+        >
+          <Image src="/icons/stop-circle.svg" alt="עצירה" width={20} height={20} />
+          <span className="text-lg font-medium ml-2">עצירה</span>
+        </button>
+        <button
+          className="bg-[#F8F5ED] border border-[#E6D7B8] text-[#3E404C] rounded-md px-4 py-2 flex items-center gap-2 hover:drop-shadow-md transition-all duration-200"
+          onClick={() => console.log('Edit', row)}
+        >
+          <Image src="/icons/edit-icon.svg" alt="עריכה" width={20} height={20} />
+          <span className="text-lg font-medium ml-2">עריכה</span>
+        </button>
+        <button
+          className="bg-[#F8F5ED] border border-[#E6D7B8] text-[#3E404C] rounded-md px-4 py-2 flex items-center gap-2 hover:drop-shadow-md transition-all duration-200"
+          onClick={() => console.log('Delete', row)}
+        >
+          <Image src="/icons/delete-icon.svg" alt="מחיקה" width={20} height={20} />
+          <span className="text-lg font-medium ml-2">מחיקה</span>
+        </button>
+      </div>
+    ),
+  };
 
   const handleStatusBoxClick = (status: number) => {
     setSelectedStatus(selectedStatus === status ? null : status);
@@ -125,9 +146,8 @@ export default function Home() {
                 {new Date().toLocaleDateString("he-IL")}
               </span>
             </div>
-
             <div className="flex flex-wrap gap-4">
-              <div 
+              <div
                 className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 1 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
                 onClick={() => handleStatusBoxClick(1)}
               >
@@ -144,8 +164,7 @@ export default function Home() {
                   <span className="text-xl font-light">נסיעות ממתינות</span>
                 </div>
               </div>
-
-              <div 
+              <div
                 className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 2 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
                 onClick={() => handleStatusBoxClick(2)}
               >
@@ -162,8 +181,7 @@ export default function Home() {
                   <span className="text-xl font-light">נסיעות פעילות</span>
                 </div>
               </div>
-
-              <div 
+              <div
                 className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 3 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
                 onClick={() => handleStatusBoxClick(3)}
               >
@@ -180,25 +198,21 @@ export default function Home() {
                   <span className="text-xl font-light">נסיעות שהסתיימו</span>
                 </div>
               </div>
-
               <button className="h-48 w-72 p-8 bg-[#ECE9E2] flex justify-center items-center border-2 border-primary rounded-lg hover:drop-shadow-lg transition-all duration-200">
                 <span className="text-2xl font-medium">{getTotalPrice()}</span>
               </button>
             </div>
           </section>
-
           <section className="flex flex-col gap-6 mx-20 mb-20">
             <div className="flex justify-start items-center gap-3 text-3xl">
               <h2 className="text-foreground font-medium">פירוט נסיעות</h2>
               <span className="text-accent">({filteredTrips.length})</span>
             </div>
-
             <div className="">
               <DataTable
                 data={filteredTrips}
-                columns={columns}
+                columns={[...columns, actionColumn]}
                 showCheckbox={true}
-                actions={actions}
                 showSearch={false}
                 showFilter={false}
               />
