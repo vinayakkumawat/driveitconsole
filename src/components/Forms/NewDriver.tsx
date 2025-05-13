@@ -15,6 +15,24 @@ import { API_BASE_URL } from '@/lib/api';
 import { getCurrentUser } from '@/lib/auth';
 import { Input } from '../ui/input';
 
+const fetchTokenAndSave = async (): Promise<string | null> => {
+  try {
+    const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
+    const data = await response.text();
+    if (data && data.includes('.')) {
+      localStorage.setItem('auth-token', data);
+      console.log("🔑 טוקן נטען ונשמר:", data);
+      return data;
+    } else {
+      console.error("❌ הטוקן לא תקין:", data);
+      return null;
+    }
+  } catch (err) {
+    console.error("🚫 שגיאה בטעינת הטוקן:", err);
+    return null;
+  }
+};
+
 const newDriverFormSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
@@ -85,24 +103,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
       variableCharge: 0,
     },
   });
-   async function fetchTokenAndSave(): Promise<string | null> {
-    try {
-        const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
-        const data = await response.text(); // נניח שהתשובה היא הטוקן עצמו כטקסט רגיל
-        if (data && data.includes('.')) {
-            localStorage.setItem('auth-token', data);
-            console.log("🔑 טוקן נטען ונשמר:", data);
-            return data;
-        } else {
-            console.error("❌ הטוקן לא תקין:", data);
-            return null;
-        }
-    } catch (err) {
-        console.error("🚫 שגיאה בטעינת הטוקן:", err);
-        return null;
-    }
-}
-
+  
 
   async function onSubmit(values: NewDriverFormValues) {
     try {
