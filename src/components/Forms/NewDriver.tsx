@@ -87,26 +87,36 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
   });
 
   useEffect(() => {
-    async function fetchAndStoreToken() {
-      try {
-        const response = await fetch("https://test.drive-it.co.il/api/token?password=mySecretPassword");
-        const data = await response.json();
-        if (data.token && data.token.split('.').length === 3) {
-          localStorage.setItem('auth-token', data.token);
-          console.log("✅ טוקן נשמר בהצלחה");
+   async function fetchTokenAndSave(): Promise<string | null> {
+    try {
+        const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
+        const data = await response.text(); // נניח שהתשובה היא הטוקן עצמו כטקסט רגיל
+        if (data && data.includes('.')) {
+            localStorage.setItem('auth-token', data);
+            console.log("🔑 טוקן נטען ונשמר:", data);
+            return data;
         } else {
-          console.error("❌ טוקן לא תקין או חסר");
+            console.error("❌ הטוקן לא תקין:", data);
+            return null;
         }
-      } catch (error) {
-        console.error("❌ שגיאה בשליפת הטוקן:", error);
-      }
+    } catch (err) {
+        console.error("🚫 שגיאה בטעינת הטוקן:", err);
+        return null;
     }
-    fetchAndStoreToken();
-  }, []);
+}
+  }
 
   async function onSubmit(values: NewDriverFormValues) {
     try {
-      const token = localStorage.getItem('auth-token');
+      let token = localStorage.getItem('auth-token');
+if (!token) {
+    token = await fetchTokenAndSave();
+    if (!token) {
+        console.error("❌ לא הצלחנו להשיג טוקן");
+        return;
+    }
+}
+
       const isJwt = token && token.split('.').length === 3;
 
       const formattedData = {
