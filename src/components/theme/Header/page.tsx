@@ -3,6 +3,8 @@ import { Button } from '../../ui/button'
 import PopupModule from '../PopupModule'
 import NewDriver from '@/components/Forms/NewDriver'
 import TripForm from '@/components/Forms/TripForm';
+import SendMessage from '@/components/Forms/SendMessage';
+import MessageToDriver from '@/components/Forms/MessageToDriver';
 
 interface HeaderProps {
     onCancel: () => void;
@@ -16,11 +18,11 @@ const Header = ({onCancel}: HeaderProps) => {
                     <Button className="px-12 bg-secondary text-[#3E404C] xl:text-lg">נסיעה חדשה</Button>
                 </PopupModule>
 
-                <PopupModule form={<div>Form Component</div>}>
+                <PopupModule form={<SendMessage onCancel={onCancel} />}>
                     <Button className="px-1</DialogTrigger>2 bg-secondary text-[#3E404C] xl:text-lg">שליחות חדשה</Button>
                 </PopupModule>
 
-                <PopupModule form={<div>Form Component</div>}>
+                <PopupModule form={<MessageToDriver onCancel={onCancel} />}>
                     <Button className="px-12 bg-secondary text-[#3E404C] xl:text-lg">הודעה לנהגים</Button>
                 </PopupModule>
 

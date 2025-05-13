@@ -44,7 +44,7 @@ interface Props<T extends FieldValues> {
   form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
-  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street" | "driver" | "channel" | "customer";
+  inputType: "text" | "number" | "email" | "select" | "date" | "time" | "city" | "street" | "driver" | "channel" | "customer" | "textarea";
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -369,6 +369,13 @@ const FormDataInputSingleElement = <T extends FieldValues>({
                     ))}
                   </SelectContent>
                 </Select>
+              ) : inputType === "textarea" ? (
+                <textarea
+                  placeholder={placeholder}
+                  {...field}
+                  className="bg-background w-full h-24 rounded-md border px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  disabled={disabled}
+                />
               ) : (
                 <>
                   <Input
