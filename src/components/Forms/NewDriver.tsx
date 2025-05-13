@@ -116,31 +116,32 @@ if (!token) {
 }
 
       const isJwt = token && token.split('.').length === 3;
+const formattedData = {
+  _company_id: companyDetails.id,
+  _first_name: values.firstName,
+  _last_name: values.lastName || '',
+  _address: values.address || '',
+  _city: values.city || '',
+  _serial_number: values.serialNumber,
+  _channel_id: values.belongsToTheChannel ? parseInt(values.belongsToTheChannel) : null,
+  _vehicle_type: values.vehicleType || '',
+  _number_of_seats: values.numberOfPlaces || 0,
+  _category: values.category || '',
+  _vehicle_status: values.vehicleCondition || '',
+  _email: values.emailAddress || '',
+  _phone: formatPhoneNumber(values.phone),
+  _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
+  _fixed_charge_by: selectedCheckbox === 'default' ? 'Company' : 'Channel', // ✅ זו השורה שנוספה
+  _fixed_charge: selectedCheckbox === 'default'
+    ? parseFloat(companyDetails.defaultFixedCharge)
+    : parseFloat(values.fixedCharge?.toString() || '0'),
+  _percentage_charge: selectedCheckbox === 'default'
+    ? parseFloat(companyDetails.defaultVariableCharge)
+    : parseFloat(values.variableCharge?.toString() || '0'),
+  _user_id: currentUser.id,
+};
 
-      const formattedData = {
-        _company_id: companyDetails.id,
-        _first_name: values.firstName,
-        _last_name: values.lastName || '',
-        _address: values.address || '',
-        _city: values.city || '',
-        _serial_number: values.serialNumber,
-        _channel_id: values.belongsToTheChannel ? parseInt(values.belongsToTheChannel) : null,
-        _vehicle_type: values.vehicleType || '',
-        _number_of_seats: values.numberOfPlaces || 0,
-        _category: values.category || '',
-        _vehicle_status: values.vehicleCondition || '',
-        _email: values.emailAddress || '',
-        _phone: formatPhoneNumber(values.phone),
-        _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-        _fixed_charge: selectedCheckbox === 'default'
-          ? parseFloat(companyDetails.defaultFixedCharge)
-          : parseFloat(values.fixedCharge?.toString() || '0'),
-        _percentage_charge: selectedCheckbox === 'default'
-          ? parseFloat(companyDetails.defaultVariableCharge)
-          : parseFloat(values.variableCharge?.toString() || '0'),
-        _user_id: currentUser.id,
-      };
-
+    
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...(isJwt ? { 'Authorization': `Bearer ${token}` } : {}),
