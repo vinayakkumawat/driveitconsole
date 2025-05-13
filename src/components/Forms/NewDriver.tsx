@@ -86,37 +86,9 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
     },
   });
 
-  async function fetchTokenAndSave(): Promise<string | null> {
-    try {
-      const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
-      const data = await response.text();
-      if (data && data.includes('.')) {
-        localStorage.setItem('auth-token', data);
-        console.log("🧪 Current Token:", data);
-        console.log("🧪 Token Split:", data.split('.').length);
-        return data;
-      } else {
-        console.error("❌ הטוקן לא תקין:", data);
-        return null;
-      }
-    } catch (err) {
-      console.error("🚫 שגיאה בטעינת הטוקן:", err);
-      return null;
-    }
-  }
-
   async function onSubmit(values: NewDriverFormValues) {
     try {
-      let token = localStorage.getItem('auth-token');
-      if (!token) {
-        token = await fetchTokenAndSave();
-        if (!token) {
-          console.error("❌ לא הצלחנו להשיג טוקן");
-          return;
-        }
-      }
-
-      const isJwt = token && token.split('.').length === 3;
+      const token = localStorage.getItem('auth-token');
 
       const formattedData = {
         _company_id: companyDetails.id,
@@ -145,7 +117,7 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        ...(isJwt ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       };
 
       const response = await fetch(`${API_BASE_URL}/rpc/create_driver_with_charge`, {
@@ -154,256 +126,137 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
         body: JSON.stringify({ p: formattedData }),
       });
 
-      const responseBody = await response.text();
-
-      console.log("📥 סטטוס התגובה:", response.status);
-      console.log("📥 תוכן התגובה מהשרת:", responseBody);
-
       if (!response.ok) {
-        console.error("❌ שגיאה ביצירת הנהג:", responseBody);
+        console.error("Error creating driver:", await response.text());
         return;
       }
 
-      console.log("✅ הנהג נוצר בהצלחה");
+      console.log("Driver created successfully");
       onCancel();
     } catch (error) {
-      console.error('🛑 שגיאה כללית בשליחת הטופס:', error);
+      console.error('Error submitting form:', error);
     }
   }
 
-    return (
-  
-
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-
-                <div className='flex flex-col gap-4 max-h-[70vh] overflow-y-scroll'>
-
-                    <div className='w-full flex flex-col gap-2'>
-                        <Label className='font-bold'>
-                            פרטי הנהג
-                        </Label>
-                        <div className="bg-white py-4 px-6 flex justify-between rounded-lg w-full">
-                            <div className='flex items-center gap-2'>
-                                <div className='relative w-12 h-12 bg-muted rounded-full'>
-                                    <div className='absolute right-0 top-0 w-4 h-4 bg-primary rounded-full'></div>
-                                </div>
-                                <div className='flex flex-col'>
-                                    <span className='font-bold'>שם הנהג</span>
-                                    <span className='font-medium'>טלפון  |  עיר</span>
-                                </div>
-                            </div>
-                            <div className='flex gap-1'>
-                                <div className='flex items-start mt-1'>
-                                    <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
-                                    <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
-                                    <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
-                                    <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
-                                    <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
-                                </div>
-                                <span className='font-light'>(0)</span>
-                            </div>
-                            <div className='bg-muted p-2 rounded-lg'>
-                                <Image src={'/icons/messages.svg'} alt={'edit'} width={30} height={30} />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className='w-full flex flex-col gap-2'>
-                        <Label className='font-bold'>
-                            פרטים אישיים<span className="text-destructive mr-1 font-normal">*</span>
-                        </Label>
-                        <div className="bg-white py-4 px-6 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border-b border-b-black w-full">
-                            {/* Using Child Component */}
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="firstName"
-                                label="שם פרטי"
-                                inputType='text'
-                                required
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="lastName"
-                                label="שם משפחה"
-                                inputType='text'
-                                required
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="phone"
-                                label="טלפון"
-                                inputType='text'
-                                required
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="additionalPhone"
-                                label="טלפון נוסף"
-                                inputType='text'
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="address"
-                                label="כתובת"
-                                inputType='text'
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="city"
-                                label="עיר"
-                                inputType='text'
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="emailAddress"
-                                label="כתובת מייל"
-                                inputType='text'
-                            />
-                            <FormField
-                                control={form.control}
-                                name={"serialNumber"}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>מספר סידורי</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="" value={field.value} readOnly className="bg-background w-full h-8" />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <div className='col-span-2'>
-                                <FormDataInputSingleElement
-                                    form={form}
-                                    name="belongsToTheChannel"
-                                    label="שייך לערוץ"
-                                    inputType="select"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className='w-full flex flex-col gap-2'>
-                        <Label className='font-bold'>
-                            פרטי רכב
-                        </Label>
-                        <div className="bg-white py-4 px-6 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border-b border-b-black w-full">
-                            {/* Using Child Component */}
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="vehicleType"
-                                label="סוג רכב"
-                                inputType='text'
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="numberOfPlaces"
-                                label="מספר מקומות"
-                                inputType='text'
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="category"
-                                label="קטגוריה"
-                                inputType='text'
-                            />
-                            <FormDataInputSingleElement
-                                form={form}
-                                name="vehicleCondition"
-                                label="מצב הרכב"
-                                inputType='text'
-                            />
-                        </div>
-                    </div>
-
-                    <div className='w-full flex flex-col gap-2'>
-                        <Label className='font-bold'>
-                            תשלומים
-                        </Label>
-                        <div className="bg-white py-4 px-6 grid grid-cols-1 gap-y-4 rounded-lg w-full">
-                            {/* Default Option */}
-                            <div className='flex gap-2 items-center'>
-                                <div className='w-full flex flex-col gap-2'>
-                                    <div className='flex gap-2'>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedCheckbox === 'default'}
-                                            onChange={() => handleCheckboxChange('default')}
-                                        />
-                                        <Label>ברירת מחדל</Label>
-                                    </div>
-                                    {selectedCheckbox === 'default' && (
-                                        <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
-                                            <FormField
-                                                control={form.control}
-                                                name={"fixedCharge"}
-                                                render={({ }) => (
-                                                    <FormItem>
-                                                        <FormLabel>חיוב קבוע</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="" value={companyDetails.defaultFixedCharge} readOnly className="bg-background w-full h-8" />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name={"variableCharge"}
-                                                render={({ }) => (
-                                                    <FormItem>
-                                                        <FormLabel>חיוב משתנה</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="" value={companyDetails.defaultVariableCharge} readOnly className="bg-background w-full h-8" />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Custom Option */}
-                            <div className='flex gap-2 items-center'>
-                                <div className='w-full flex flex-col gap-2'>
-                                    <div className='flex gap-2'>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedCheckbox === 'custom'}
-                                            onChange={() => handleCheckboxChange('custom')}
-                                        />
-                                        <Label>מותאם אישית</Label>
-                                    </div>
-                                    {selectedCheckbox === 'custom' && (
-                                        <div className='grid grid-cols-2 gap-x-6 gap-y-2 w-full'>
-                                            <FormDataInputSingleElement
-                                                form={form}
-                                                name="fixedCharge"
-                                                label="חיוב קבוע"
-                                                inputType='text'
-                                            />
-                                            <FormDataInputSingleElement
-                                                form={form}
-                                                name="variableCharge"
-                                                label="חיוב משתנה באחוזים"
-                                                inputType='text'
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+        <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-scroll">
+          {/* Driver Info */}
+          <div className="w-full flex flex-col gap-2">
+            <Label className="font-bold">פרטי הנהג</Label>
+            <div className="bg-white py-4 px-6 flex justify-between rounded-lg w-full">
+              <div className="flex items-center gap-2">
+                <div className="relative w-12 h-12 bg-muted rounded-full">
+                  <div className="absolute right-0 top-0 w-4 h-4 bg-primary rounded-full"></div>
                 </div>
-
-                <div className='flex justify-center items-center gap-2 px-8'>
-                    <Button type="submit" className='w-full text-black h-8'>שמור</Button>
-                    <Button onClick={onCancel} className='w-full text-black bg-secondary h-8'>ביטול</Button>
+                <div className="flex flex-col">
+                  <span className="font-bold">שם הנהג</span>
+                  <span className="font-medium">טלפון  |  עיר</span>
                 </div>
-            </form>
-        </Form>
-    );
+              </div>
+              <div className="flex gap-1">
+                <div className="flex items-start mt-1">
+                  <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
+                  <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
+                  <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
+                  <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
+                  <Image src={'/icons/star.svg'} alt={'star'} width={15} height={15} />
+                </div>
+                <span className="font-light">(0)</span>
+              </div>
+              <div className="bg-muted p-2 rounded-lg">
+                <Image src={'/icons/messages.svg'} alt={'edit'} width={30} height={30} />
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Details */}
+          <div className="w-full flex flex-col gap-2">
+            <Label className="font-bold">תשלומים</Label>
+            <div className="bg-white py-4 px-6 grid grid-cols-1 gap-y-4 rounded-lg w-full">
+              {/* Default Option */}
+              <div className="flex gap-2 items-center">
+                <div className="w-full flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedCheckbox === 'default'}
+                      onChange={() => handleCheckboxChange('default')}
+                    />
+                    <Label>ברירת מחדל</Label>
+                  </div>
+                  {selectedCheckbox === 'default' && (
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 w-full">
+                      <FormField
+                        control={form.control}
+                        name={"fixedCharge"}
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>חיוב קבוע</FormLabel>
+                            <FormControl>
+                              <Input placeholder="" value={companyDetails.defaultFixedCharge} readOnly className="bg-background w-full h-8" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={"variableCharge"}
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>חיוב משתנה</FormLabel>
+                            <FormControl>
+                              <Input placeholder="" value={companyDetails.defaultVariableCharge} readOnly className="bg-background w-full h-8" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Custom Option */}
+              <div className="flex gap-2 items-center">
+                <div className="w-full flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedCheckbox === 'custom'}
+                      onChange={() => handleCheckboxChange('custom')}
+                    />
+                    <Label>מותאם אישית</Label>
+                  </div>
+                  {selectedCheckbox === 'custom' && (
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 w-full">
+                      <FormDataInputSingleElement
+                        form={form}
+                        name="fixedCharge"
+                        label="חיוב קבוע"
+                        inputType="text"
+                      />
+                      <FormDataInputSingleElement
+                        form={form}
+                        name="variableCharge"
+                        label="חיוב משתנה באחוזים"
+                        inputType="text"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-center items-center gap-2 px-8">
+          <Button type="submit" className="w-full text-black h-8">שמור</Button>
+          <Button onClick={onCancel} className="w-full text-black bg-secondary h-8">ביטול</Button>
+        </div>
+      </form>
+    </Form>
+  );
 };
 
 export default NewDriver;
