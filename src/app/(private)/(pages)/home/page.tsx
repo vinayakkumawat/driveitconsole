@@ -9,7 +9,7 @@ import { Column } from "@/lib/types";
 
 interface TripSummary {
   company_id: number;
-  status: number;
+  status: string;
   total_trips: number;
   total_price: number;
 }
@@ -20,7 +20,7 @@ interface TripDetail {
   route: string;
   service_type: string;
   service_date: string;
-  status: number;
+  status: string;
   actions?: undefined;
 }
 
@@ -46,7 +46,7 @@ const StatusBadge = ({ status }: { status: number }) => {
 export default function Home() {
   const [tripSummary, setTripSummary] = React.useState<TripSummary[]>([]);
   const [tripDetails, setTripDetails] = React.useState<TripDetail[]>([]);
-  const [selectedStatus, setSelectedStatus] = React.useState<number | null>(null);
+  const [selectedStatus, setSelectedStatus] = React.useState<string | null>(null);
   const [filteredTrips, setFilteredTrips] = React.useState<TripDetail[]>([]);
 
   React.useEffect(() => {
@@ -82,7 +82,7 @@ export default function Home() {
     }
   }, [selectedStatus, tripDetails]);
 
-  const getStatusCount = (status: number) => {
+  const getStatusCount = (status: string) => {
     const summary = tripSummary.find(item => item.status === status);
     return summary ? summary.total_trips : 0;
   };
@@ -131,7 +131,7 @@ export default function Home() {
     ),
   };
 
-  const handleStatusBoxClick = (status: number) => {
+  const handleStatusBoxClick = (status: string) => {
     setSelectedStatus(selectedStatus === status ? null : status);
   };
 
@@ -148,8 +148,8 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap gap-4">
               <div
-                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 1 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
-                onClick={() => handleStatusBoxClick(1)}
+                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === "1" ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
+                onClick={() => handleStatusBoxClick("1")}
               >
                 <button className="absolute top-3 left-4">
                   <Image
@@ -160,13 +160,13 @@ export default function Home() {
                   />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">{getStatusCount(1)}</span>
+                  <span className="text-6xl font-bold">{getStatusCount("1")}</span>
                   <span className="text-xl font-light">נסיעות ממתינות</span>
                 </div>
               </div>
               <div
-                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 2 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
-                onClick={() => handleStatusBoxClick(2)}
+                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === "2" ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
+                onClick={() => handleStatusBoxClick("2")}
               >
                 <button className="absolute top-3 left-4">
                   <Image
@@ -177,13 +177,13 @@ export default function Home() {
                   />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">{getStatusCount(2)}</span>
+                  <span className="text-6xl font-bold">{getStatusCount("2")}</span>
                   <span className="text-xl font-light">נסיעות פעילות</span>
                 </div>
               </div>
               <div
-                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === 3 ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
-                onClick={() => handleStatusBoxClick(3)}
+                className={`relative h-48 w-72 p-8 flex flex-col justify-center items-start rounded-lg cursor-pointer hover:drop-shadow-lg transition-all duration-200 ${selectedStatus === "3" ? 'bg-primary' : 'bg-white border-r-4 border-r-primary'}`}
+                onClick={() => handleStatusBoxClick("3")}
               >
                 <button className="absolute top-3 left-4">
                   <Image
@@ -194,7 +194,7 @@ export default function Home() {
                   />
                 </button>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-bold">{getStatusCount(3)}</span>
+                  <span className="text-6xl font-bold">{getStatusCount("3")}</span>
                   <span className="text-xl font-light">נסיעות שהסתיימו</span>
                 </div>
               </div>
