@@ -15,25 +15,22 @@ import { API_BASE_URL } from '@/lib/api';
 import { getCurrentUser } from '@/lib/auth';
 import { Input } from '../ui/input';
 
-const fetchTokenAndSave = async (): Promise<string | null> => {
-  try {
-    const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
-    const data = await response.text();
-    if (data && data.includes('.')) {
-      localStorage.setItem('auth-token', data);
-     console.log("🧪 Current Token:", token);
-      console.log("🧪 Token Split:", token?.split('.').length);
+"use client";
 
-      return data;
-    } else {
-      console.error("❌ הטוקן לא תקין:", data);
-      return null;
-    }
-  } catch (err) {
-    console.error("🚫 שגיאה בטעינת הטוקן:", err);
-    return null;
-  }
-};
+import React, { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import FormDataInputSingleElement from '@/components/ui/formDataInputSingleElement';
+import { Label } from '../ui/label';
+import Image from 'next/image';
+import { generateSerialNumber, formatPhoneNumber } from '@/lib/utils';
+import { API_BASE_URL } from '@/lib/api';
+import { getCurrentUser } from '@/lib/auth';
+import { Input } from '../ui/input';
 
 const newDriverFormSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -105,46 +102,64 @@ const NewDriver = ({ onCancel }: NewDriverProps) => {
       variableCharge: 0,
     },
   });
-  
+
+  async function fetchTokenAndSave(): Promise<string | null> {
+    try {
+      const response = await fetch('https://test.drive-it.co.il/api/token?password=mySecretPassword');
+      const data = await response.text();
+      if (data && data.includes('.')) {
+        localStorage.setItem('auth-token', data);
+        console.log("🧪 Current Token:", data);
+        console.log("🧪 Token Split:", data.split('.').length);
+        return data;
+      } else {
+        console.error("❌ הטוקן לא תקין:", data);
+        return null;
+      }
+    } catch (err) {
+      console.error("🚫 שגיאה בטעינת הטוקן:", err);
+      return null;
+    }
+  }
 
   async function onSubmit(values: NewDriverFormValues) {
     try {
       let token = localStorage.getItem('auth-token');
-if (!token) {
-    token = await fetchTokenAndSave();
-    if (!token) {
-        console.error("❌ לא הצלחנו להשיג טוקן");
-        return;
-    }
-}
+      if (!token) {
+        token = await fetchTokenAndSave();
+        if (!token) {
+          console.error("❌ לא הצלחנו להשיג טוקן");
+          return;
+        }
+      }
 
       const isJwt = token && token.split('.').length === 3;
-const formattedData = {
-  _company_id: companyDetails.id,
-  _first_name: values.firstName,
-  _last_name: values.lastName || '',
-  _address: values.address || '',
-  _city: values.city || '',
-  _serial_number: values.serialNumber,
-  _channel_id: values.belongsToTheChannel ? parseInt(values.belongsToTheChannel) : null,
-  _vehicle_type: values.vehicleType || '',
-  _number_of_seats: values.numberOfPlaces || 0,
-  _category: values.category || '',
-  _vehicle_status: values.vehicleCondition || '',
-  _email: values.emailAddress || '',
-  _phone: formatPhoneNumber(values.phone),
-  _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
-  _fixed_charge_by: selectedCheckbox === 'default' ? 'Company' : 'Channel', // ✅ זו השורה שנוספה
-  _fixed_charge: selectedCheckbox === 'default'
-    ? parseFloat(companyDetails.defaultFixedCharge)
-    : parseFloat(values.fixedCharge?.toString() || '0'),
-  _percentage_charge: selectedCheckbox === 'default'
-    ? parseFloat(companyDetails.defaultVariableCharge)
-    : parseFloat(values.variableCharge?.toString() || '0'),
-  _user_id: currentUser.id,
-};
 
-    
+      const formattedData = {
+        _company_id: companyDetails.id,
+        _first_name: values.firstName,
+        _last_name: values.lastName || '',
+        _address: values.address || '',
+        _city: values.city || '',
+        _serial_number: values.serialNumber,
+        _channel_id: values.belongsToTheChannel ? parseInt(values.belongsToTheChannel) : null,
+        _vehicle_type: values.vehicleType || '',
+        _number_of_seats: values.numberOfPlaces || 0,
+        _category: values.category || '',
+        _vehicle_status: values.vehicleCondition || '',
+        _email: values.emailAddress || '',
+        _phone: formatPhoneNumber(values.phone),
+        _additional_phone: values.additionalPhone ? formatPhoneNumber(values.additionalPhone) : '',
+        _fixed_charge: selectedCheckbox === 'default'
+          ? parseFloat(companyDetails.defaultFixedCharge)
+          : parseFloat(values.fixedCharge?.toString() || '0'),
+        _percentage_charge: selectedCheckbox === 'default'
+          ? parseFloat(companyDetails.defaultVariableCharge)
+          : parseFloat(values.variableCharge?.toString() || '0'),
+        _fixed_charge_by: selectedCheckbox === 'default' ? 'Company' : 'Channel',
+        _user_id: currentUser.id,
+      };
+
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...(isJwt ? { 'Authorization': `Bearer ${token}` } : {}),
@@ -173,7 +188,6 @@ const formattedData = {
     }
   }
 
- 
     return (
   
 
