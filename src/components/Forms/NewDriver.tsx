@@ -21,7 +21,9 @@ const fetchTokenAndSave = async (): Promise<string | null> => {
     const data = await response.text();
     if (data && data.includes('.')) {
       localStorage.setItem('auth-token', data);
-      console.log("🔑 טוקן נטען ונשמר:", data);
+     console.log("🧪 Current Token:", token);
+      console.log("🧪 Token Split:", token?.split('.').length);
+
       return data;
     } else {
       console.error("❌ הטוקן לא תקין:", data);
